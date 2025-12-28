@@ -369,12 +369,12 @@ export default function Home() {
             <div
               key={example.title}
               data-example={example.title}
-              className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5"
+              className="rounded-2xl border border-slate-700 bg-slate-900/60 p-5"
             >
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-slate-100">
                 {example.title}
               </h3>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-300">
                 {example.description}
               </p>
             </div>
@@ -477,12 +477,12 @@ export default function Home() {
             <details
               key={item.question}
               data-faq={item.question}
-              className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5"
+              className="rounded-2xl border border-slate-700 bg-slate-900/60 p-5"
             >
-              <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-100">
                 {item.question}
               </summary>
-              <p className="mt-3 text-sm text-slate-600">{item.answer}</p>
+              <p className="mt-3 text-sm text-slate-300">{item.answer}</p>
             </details>
           ))}
         </div>
