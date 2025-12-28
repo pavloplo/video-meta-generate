@@ -105,6 +105,8 @@ export default function FAQAccordion() {
                 id={panelId}
                 role="region"
                 aria-labelledby={buttonId}
+                hidden={!isOpen}
+                aria-hidden={!isOpen}
                 className={`overflow-hidden text-sm text-slate-300 transition-all duration-200 ${
                   isOpen ? "max-h-64 pt-3" : "max-h-0"
                 }`}
