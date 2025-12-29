@@ -35,7 +35,9 @@ export const env = (() => {
   if (!parsed.success) {
     // Throwing here fails fast during server startup / first import.
     throw new Error(
-      `Invalid environment configuration:\n${formatZodError(parsed.error)}\n`
+      `Invalid environment configuration (ensure DATABASE_URL and DIRECT_URL are set):\n${formatZodError(
+        parsed.error
+      )}\n`
     );
   }
   return parsed.data;
