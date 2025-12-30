@@ -27,7 +27,7 @@ jobs:
 
     env:
       APP_DIR: /srv/apps/video-meta-generate
-      IMAGE: ghcr.io/${{ github.repository }}:staging
+      IMAGE: ghcr.io/${{ toLower(github.event.repository.name) }}:${{ github.event.inputs.ref }}
 
     steps:
       - name: Checkout
