@@ -10,7 +10,15 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY package.json package-lock.json ./
+COPY next.config.js ./
+COPY next-env.d.ts ./
+COPY tsconfig.json ./
+COPY postcss.config.js ./
+COPY tailwind.config.ts ./
+COPY prisma.config.ts ./
+COPY src ./src
+COPY prisma ./prisma
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
