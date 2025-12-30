@@ -6,7 +6,8 @@ on:
 
 jobs:
   migrate-from-scratch:
-    runs-on: ubuntu-latest
+    environment: ci
+    runs-on: self-hosted
     services:
       postgres:
         image: postgres:16-alpine
