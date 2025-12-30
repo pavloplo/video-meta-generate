@@ -20,6 +20,8 @@ COPY prisma.config.ts ./
 COPY src ./src
 COPY prisma ./prisma
 
+ARG DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
+ENV DATABASE_URL=${DATABASE_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run db:generate
 RUN npm run build
