@@ -54,4 +54,3 @@ jobs:
           DIRECT_URL: postgresql://postgres:postgres@localhost:5432/app_test?schema=public
           SESSION_COOKIE_NAME: sid
           SESSION_TTL_DAYS: "14"
-          NODE_ENV: test
