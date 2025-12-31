@@ -30,9 +30,11 @@ Open [http://localhost:3000](http://localhost:3000) to view the UI.
 - `npm run start` – Run the production server after building.
 - `npm run lint` – Run Next.js lint checks.
 
-## Local DB (Docker)
+## Local Development
 
-Start DB:
+### Database Setup
+
+Start local PostgreSQL database:
 
 ```bash
 docker compose up -d
@@ -44,24 +46,51 @@ Stop DB:
 docker compose down
 ```
 
-Stop + wipe DB (destructive):
+Stop + wipe DB (destructive - **⚠️ This will delete all your local data**):
 
 ```bash
 docker compose down -v
 ```
 
-Set `.env.local`:
+### Environment Configuration
+
+Create a `.env.local` file in the project root:
 
 ```bash
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/app?schema=public"
 DIRECT_URL="postgresql://postgres:postgres@localhost:5432/app?schema=public"
 ```
 
-Prisma / Next integration notes
+**⚠️ Important:** Never commit `.env.local` to version control. It's already in `.gitignore`.
 
-With Option A env validation, both URLs must be set in `.env.local`.
+### Environment Isolation
 
-Prisma will use `DIRECT_URL` for migrations once schema is added (Task 1.3).
+Your setup ensures different databases for each environment:
+
+- **Local Development**: Uses Docker PostgreSQL container (`localhost:5432/app`)
+- **Staging**: Uses `secrets.STAGING_DATABASE_URL` (remote database)
+- **Production**: Uses `secrets.PROD_DATABASE_URL` (remote database)
+
+**Environment Variables Required:**
+- `DATABASE_URL` and `DIRECT_URL` must be set for all environments
+- Local development reads from `.env.local`
+- Staging/Production read from GitHub Secrets
+
+### Prisma Commands
+
+```bash
+# Generate Prisma client (local)
+npm run db:generate
+
+# Run migrations in development
+npm run db:migrate
+
+# Reset database (⚠️ destructive)
+npm run db:reset
+
+# View database in browser
+npm run db:studio
+```
 
 ## Project structure
 
