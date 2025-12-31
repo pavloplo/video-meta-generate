@@ -59,16 +59,36 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set database URLs
+        run: |
+          # Set database URLs from GitHub secrets
+          echo "DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}" >> $GITHUB_ENV
+          echo "DIRECT_URL=${{ secrets.STAGING_DIRECT_URL }}" >> $GITHUB_ENV
+
       - name: Build & push image (staging tag)
         uses: docker/build-push-action@v6
         with:
           push: true
           tags: ${{ env.IMAGE }}
+          build-args: |
+            DATABASE_URL=${{ env.DATABASE_URL }}
+            DIRECT_URL=${{ env.DIRECT_URL }}
+
+      - name: Copy docker-compose.yml to deployment directory
+        run: |
+          set -e
+          mkdir -p "${APP_DIR}"
+          cp docker-compose.yml "${APP_DIR}/"
 
       - name: Deploy on runner host
         run: |
           set -e
           cd "${APP_DIR}"
+          export IMAGE="${{ env.IMAGE }}"
+          export DATABASE_URL="${{ env.DATABASE_URL }}"
+          export DIRECT_URL="${{ env.DIRECT_URL }}"
           docker compose pull
-          docker compose up -d
+          echo "Running database migrations..."
+          docker compose run --rm app npm run db:deploy
+          docker compose up -d app
           docker image prune -f
