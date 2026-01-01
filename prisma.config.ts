@@ -1,10 +1,7 @@
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
-// Prisma's env() helper reads DATABASE_URL from environment variables
-// The migration script ensures this is set to the direct connection URL
+// Database URL is defined in schema.prisma as env("DATABASE_URL")
+// This allows Prisma to handle environment variable loading properly
 export default defineConfig({
   schema: "prisma/schema.prisma",
-  datasource: {
-    url: env("DATABASE_URL"),
-  },
 });
