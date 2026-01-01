@@ -32,22 +32,22 @@ Open [http://localhost:3000](http://localhost:3000) to view the UI.
 
 ## Local DB (Docker)
 
-Start DB:
+Start DB (local development only):
 
 ```bash
-docker compose up -d
+docker compose --profile local up -d postgres
 ```
 
 Stop DB:
 
 ```bash
-docker compose down
+docker compose --profile local down
 ```
 
 Stop + wipe DB (destructive):
 
 ```bash
-docker compose down -v
+docker compose --profile local down -v
 ```
 
 Set `.env.local`:
