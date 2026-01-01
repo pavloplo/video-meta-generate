@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-// Simple migration script that runs Prisma migrations
-// Prisma's env() helper in prisma.config.ts will read environment variables
+// Migration script that ensures the correct DATABASE_URL is set for migrations
+// For migrations, we need the DIRECT connection (bypasses PgBouncer)
 const { execSync } = require('child_process');
 
-// Verify at least one database URL is set
-const hasDbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+// Get the direct database URL (DIRECT_URL is for migrations, DATABASE_URL is for app)
+const directUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
-if (!hasDbUrl) {
+if (!directUrl) {
   console.error('❌ ERROR: DATABASE_URL or DIRECT_URL must be set');
   console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('DATABASE') || k.includes('DIRECT')).join(', ') || 'none');
   process.exit(1);
@@ -15,8 +15,14 @@ if (!hasDbUrl) {
 
 console.log('✅ Database URL is set');
 
+// For migrations, always use DIRECT_URL and set DATABASE_URL to it
+// This ensures prisma.config.ts can read it with env("DATABASE_URL")
+process.env.DATABASE_URL = directUrl;
+process.env.DIRECT_URL = directUrl;
+
+console.log('🔧 Environment configured for migrations');
+
 // Run Prisma migrate deploy
-// Prisma will use env() from prisma.config.ts to read the URL
 try {
   execSync('npx prisma migrate deploy', {
     stdio: 'inherit',
