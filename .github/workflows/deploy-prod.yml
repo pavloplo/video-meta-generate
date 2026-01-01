@@ -17,6 +17,9 @@ jobs:
   build-and-deploy:
     environment: production
     runs-on: self-hosted
+    # To use a specific host, configure the 'production' environment in GitHub
+    # Settings → Environments → production → Add deployment branch rule
+    # Then add runner labels like: runs-on: [self-hosted, production]
 
     env:
       APP_DIR: /srv/apps/video-meta-generate-prod

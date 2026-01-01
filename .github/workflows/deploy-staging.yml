@@ -21,6 +21,9 @@ jobs:
   build-and-deploy:
     environment: staging
     runs-on: self-hosted
+    # To use a specific host, configure the 'staging' environment in GitHub
+    # Settings → Environments → staging → Add deployment branch rule
+    # Then add runner labels like: runs-on: [self-hosted, staging]
 
     env:
       APP_DIR: /srv/apps/video-meta-generate

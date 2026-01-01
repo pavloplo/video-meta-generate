@@ -141,9 +141,37 @@ git tag release-1.0.0
 git push origin release-1.0.0
 ```
 
+### Deployment Architecture
+
+**Current Setup:** Both staging and production deploy to the **same host** but use different directories:
+- Staging: `/srv/apps/video-meta-generate`
+- Production: `/srv/apps/video-meta-generate-prod`
+
+**To Deploy to Different Hosts:**
+
+1. Configure GitHub Environments with runner labels:
+   - Go to Settings → Environments
+   - For `staging` environment: Add runner label `staging`
+   - For `production` environment: Add runner label `production`
+
+2. Update workflows to use labels:
+   ```yaml
+   runs-on: [self-hosted, staging]  # for staging
+   runs-on: [self-hosted, production]  # for production
+   ```
+
+3. Configure runners on each host:
+   ```bash
+   # On staging host
+   ./config.sh --labels staging
+   
+   # On production host
+   ./config.sh --labels production
+   ```
+
 ### Server Setup
 
-Before first deployment, prepare your server:
+Before first deployment, prepare your server(s):
 
 1. **Create deploy user:**
    ```bash
