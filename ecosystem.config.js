@@ -1,10 +1,14 @@
+const appName = process.env.PM2_APP_NAME || "video-meta-generate";
+const appDir =
+  process.env.PM2_APP_DIR || "/srv/apps/video-meta-generate/current";
+
 module.exports = {
   apps: [
     {
-      name: "video-meta-generate",
+      name: appName,
       script: "npm",
       args: "start",
-      cwd: "/srv/apps/video-meta-generate/current",
+      cwd: appDir,
       instances: 1,
       exec_mode: "fork",
       env: {

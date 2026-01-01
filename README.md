@@ -145,26 +145,43 @@ git push origin release-1.0.0
 
 Before first deployment, prepare your server:
 
-1. **Install Node.js 20 and PM2:**
+1. **Create deploy user and switch to it:**
    ```bash
-   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-   sudo apt-get install -y nodejs
-   npm install -g pm2
-   pm2 startup systemd
+   sudo useradd -m -s /bin/bash deploy
+   sudo usermod -aG sudo deploy  # optional, for admin access
+   sudo -u deploy -H bash -lc 'cd ~ && pwd'  # test user works
    ```
 
-2. **Create deployment directories:**
+2. **Switch to deploy user and run setup:**
+   ```bash
+   sudo -u deploy -H bash -lc '
+     # Install Node.js 20
+     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+     sudo apt-get install -y nodejs
+
+     # Install PM2 and setup systemd
+     npm install -g pm2
+     pm2 startup systemd -u deploy --hp /home/deploy
+
+     # Run setup script
+     cd /path/to/your/repo
+     bash scripts/setup-server.sh
+   '
+   ```
+
+3. **Create deployment directories (as root):**
    ```bash
    sudo mkdir -p /srv/apps/video-meta-generate
    sudo mkdir -p /srv/apps/video-meta-generate-prod
-   sudo chown -R $(whoami):$(whoami) /srv/apps/video-meta-generate
-   sudo chown -R $(whoami):$(whoami) /srv/apps/video-meta-generate-prod
+   sudo chown -R deploy:deploy /srv/apps/video-meta-generate
+   sudo chown -R deploy:deploy /srv/apps/video-meta-generate-prod
    ```
 
-3. **Setup GitHub Actions self-hosted runner:**
+4. **Setup GitHub Actions self-hosted runner:**
    - Go to repository Settings → Actions → Runners
    - Click "New self-hosted runner"
    - Follow Linux installation instructions
+   - **Important:** Configure runner to run as deploy user if possible
 
 ### Required GitHub Secrets
 
@@ -208,14 +225,25 @@ pm2 restart video-meta-generate
 ### Troubleshooting
 
 **Application won't start:**
-- Check logs: `pm2 logs video-meta-generate`
+- Check logs: `sudo -u deploy pm2 logs video-meta-generate`
 - Verify env file: `cat /srv/apps/video-meta-generate/current/.env`
-- Check Node version: `node --version` (should be 20.x)
+- Check Node version: `sudo -u deploy node --version` (should be 20.x)
+- Check PM2 status: `sudo -u deploy pm2 status`
+
+**PM2 user/permission issues:**
+- PM2 commands must run as deploy user: `sudo -u deploy pm2 status`
+- Check PM2 home: `sudo -u deploy env | grep PM2_HOME`
+- Verify systemd service: `sudo systemctl status pm2-deploy`
 
 **Database connection issues:**
 - Verify GitHub Secrets are set correctly
 - Test connection from server to Supabase
-- Check migration status: `npm run db:status`
+- Check migration status: `cd /srv/apps/video-meta-generate/current && sudo -u deploy npm run db:status`
+
+**Deployment directory issues:**
+- Verify files exist: `ls -la /srv/apps/video-meta-generate/current/`
+- Check permissions: `ls -ld /srv/apps/video-meta-generate/current/`
+- Ensure deploy user owns directory: `sudo chown -R deploy:deploy /srv/apps/video-meta-generate`
 
 **Rollback procedure:**
 Each deployment creates a timestamped directory. List them with `ls -lt | grep deploy-`, then update the `current` symlink to point to a previous deployment and restart PM2.
