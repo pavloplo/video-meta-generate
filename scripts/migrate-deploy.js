@@ -18,17 +18,48 @@ if (!databaseUrl) {
 console.log('✅ Database URL found (length:', databaseUrl.length + ')');
 console.log('✅ Using:', databaseUrl === process.env.DIRECT_URL ? 'DIRECT_URL' : 'DATABASE_URL');
 
-// Run Prisma migrate deploy
+// Verify Supabase connection string format
+const urlPattern = /postgresql:\/\/[^:]+:[^@]+@[^:]+:\d+\/[^?]+/;
+if (!urlPattern.test(databaseUrl)) {
+  console.warn('⚠️  Warning: Database URL format may be incorrect');
+  console.warn('Expected format: postgresql://user:password@host:port/database');
+}
+
+// Extract connection details for verification (masked)
+try {
+  const urlMatch = databaseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/([^?]+)/);
+  if (urlMatch) {
+    const [, user, , host, port, database] = urlMatch;
+    console.log('🔍 Connection details:');
+    console.log('  Host:', host);
+    console.log('  Port:', port);
+    console.log('  Database:', database);
+    console.log('  User:', user);
+    console.log('  Password:', '***');
+  }
+} catch (e) {
+  // Ignore parsing errors
+}
+
+// Set environment variables explicitly for Prisma
+process.env.DATABASE_URL = databaseUrl;
+if (process.env.DIRECT_URL) {
+  process.env.DIRECT_URL = process.env.DIRECT_URL;
+} else {
+  process.env.DIRECT_URL = databaseUrl;
+}
+
+// Run Prisma migrate deploy with explicit environment
 try {
   execSync('npx prisma migrate deploy', {
     stdio: 'inherit',
-    env: {
-      ...process.env,
-      DATABASE_URL: databaseUrl,
-      DIRECT_URL: process.env.DIRECT_URL || databaseUrl,
-    },
+    env: process.env,
+    cwd: process.cwd(),
   });
 } catch (error) {
   console.error('❌ Migration failed');
+  console.error('Verify your Supabase connection strings:');
+  console.error('  - DIRECT_URL should use port 5432 (direct connection)');
+  console.error('  - DATABASE_URL can use port 6543 (PgBouncer) or 5432');
   process.exit(1);
 }

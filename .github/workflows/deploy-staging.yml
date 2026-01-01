@@ -41,8 +41,13 @@ jobs:
 
       - name: Set database URLs
         run: |
-          echo "DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}" >> $GITHUB_ENV
-          echo "DIRECT_URL=${{ secrets.STAGING_DIRECT_URL }}" >> $GITHUB_ENV
+          # Use multiline syntax to handle special characters (#, @, ?, =) in connection strings
+          echo "DATABASE_URL<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.STAGING_DATABASE_URL }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "DIRECT_URL<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.STAGING_DIRECT_URL }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: npm ci
