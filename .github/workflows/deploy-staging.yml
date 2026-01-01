@@ -40,14 +40,14 @@ jobs:
           cache: "npm"
 
       - name: Set database URLs
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.STAGING_DIRECT_URL }}
         run: |
-          # Use multiline syntax to handle special characters (#, @, ?, =) in connection strings
-          echo "DATABASE_URL<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.STAGING_DATABASE_URL }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "DIRECT_URL<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.STAGING_DIRECT_URL }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # Export to GITHUB_ENV for use in subsequent steps
+          # Use printf to properly handle special characters
+          printf 'DATABASE_URL=%s\n' "${DATABASE_URL}" >> $GITHUB_ENV
+          printf 'DIRECT_URL=%s\n' "${DIRECT_URL}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: npm ci
