@@ -9,11 +9,9 @@ on:
         description: "Git ref (branch/tag) to deploy"
         required: true
         default: "dev"
-      
 
 permissions:
   contents: read
-  packages: write
 
 concurrency:
   group: deploy-staging
@@ -26,7 +24,7 @@ jobs:
 
     env:
       APP_DIR: /srv/apps/video-meta-generate
-      IMAGE: ghcr.io/${{ github.repository_owner }}/video-meta-generate:dev
+      NODE_ENV: production
 
     steps:
       - name: Checkout
@@ -34,81 +32,102 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.sha }}
           fetch-depth: 1
-      - name: Debug deploy variables
-        env:
-          IMAGE: ${{ env.IMAGE }}
-          APP_DIR: ${{ env.APP_DIR }}
-        run: |
-          set -e
-          check_var() {
-            local name="$1"
-            local value="$2"
-            if [ -n "$value" ]; then
-              echo "$name: set (length ${#value})"
-            else
-              echo "$name: missing"
-            fi
-          }
-          check_var "IMAGE" "$IMAGE"
-          check_var "APP_DIR" "$APP_DIR"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          driver-opts: |
-            image=moby/buildkit:buildx-stable-1
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          node-version: "20"
+          cache: "npm"
 
       - name: Set database URLs
         run: |
-          # Set database URLs from GitHub secrets
           echo "DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}" >> $GITHUB_ENV
           echo "DIRECT_URL=${{ secrets.STAGING_DIRECT_URL }}" >> $GITHUB_ENV
 
-      - name: Build & push image (staging tag)
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          tags: ${{ env.IMAGE }}
-          build-args: |
-            DATABASE_URL=${{ env.DATABASE_URL }}
-            DIRECT_URL=${{ env.DIRECT_URL }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Copy docker-compose.yml to deployment directory
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DIRECT_URL: ${{ env.DIRECT_URL }}
+        run: npm run db:generate
+
+      - name: Build application
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DIRECT_URL: ${{ env.DIRECT_URL }}
+          NODE_ENV: production
+        run: npm run build
+
+      - name: Create deployment package
         run: |
           set -e
-          mkdir -p "${APP_DIR}"
-          cp docker-compose.yml "${APP_DIR}/"
-          chown -R $USER:$USER "${APP_DIR}"
+          DEPLOY_DIR="${APP_DIR}/deploy-$(date +%s)"
+          mkdir -p "${DEPLOY_DIR}"
+          
+          # Copy necessary files
+          cp -r .next "${DEPLOY_DIR}/"
+          cp -r node_modules "${DEPLOY_DIR}/"
+          cp -r prisma "${DEPLOY_DIR}/"
+          cp -r src "${DEPLOY_DIR}/"
+          cp -r scripts "${DEPLOY_DIR}/"
+          cp package.json "${DEPLOY_DIR}/"
+          cp package-lock.json "${DEPLOY_DIR}/"
+          cp next.config.js "${DEPLOY_DIR}/"
+          cp tsconfig.json "${DEPLOY_DIR}/"
+          cp ecosystem.config.js "${DEPLOY_DIR}/" 2>/dev/null || true
+          
+          # Create .env file for runtime
+          echo "DATABASE_URL=${DATABASE_URL}" > "${DEPLOY_DIR}/.env"
+          echo "DIRECT_URL=${DIRECT_URL}" >> "${DEPLOY_DIR}/.env"
+          echo "NODE_ENV=production" >> "${DEPLOY_DIR}/.env"
+          
+          # Create symlink for quick rollback
+          ln -sfn "${DEPLOY_DIR}" "${APP_DIR}/current"
+          
+          echo "DEPLOY_DIR=${DEPLOY_DIR}" >> $GITHUB_ENV
 
-      - name: Deploy on runner host
+      - name: Run database migrations
         run: |
           set -e
-          cd "${APP_DIR}"
-          export IMAGE="${{ env.IMAGE }}"
+          cd "${APP_DIR}/current"
           export DATABASE_URL="${{ env.DATABASE_URL }}"
           export DIRECT_URL="${{ env.DIRECT_URL }}"
-          echo "Pulling latest images..."
-          docker compose pull
-          echo "Running database migrations..."
-          echo "DATABASE_URL is set: $(if [ -n \"${{ env.DATABASE_URL }}\" ]; then echo 'YES'; else echo 'NO'; fi)"
-          echo "DIRECT_URL is set: $(if [ -n \"${{ env.DIRECT_URL }}\" ]; then echo 'YES'; else echo 'NO'; fi)"
-          docker compose run --rm -e DATABASE_URL="${{ env.DATABASE_URL }}" -e DIRECT_URL="${{ env.DIRECT_URL }}" app sh -c "cd /app && echo 'Creating .env file for Prisma...' && echo 'DATABASE_URL='\$DATABASE_URL > .env && echo 'DIRECT_URL='\$DIRECT_URL >> .env && echo 'Verifying .env file...' && cat .env | sed 's/:\/\/.*@/:\/\/***:***@/' && echo 'Verifying environment variables...' && echo 'DIRECT_URL:' \${DIRECT_URL:+SET} && echo 'DATABASE_URL:' \${DATABASE_URL:+SET} && echo 'Running Prisma migrate deploy with explicit env vars...' && DIRECT_URL=\$DIRECT_URL DATABASE_URL=\$DATABASE_URL npm run db:deploy"
-          echo "Starting application..."
-          docker compose up -d app
-          echo "Cleaning up unused images..."
-          docker image prune -f
+          npm run db:deploy
+
+      - name: Restart application with PM2
+        run: |
+          set -e
+          cd "${APP_DIR}/current"
+          
+          # Check if PM2 is installed
+          if ! command -v pm2 &> /dev/null; then
+            echo "Installing PM2..."
+            npm install -g pm2
+          fi
+          
+          # Stop existing process if running
+          pm2 stop video-meta-generate || true
+          pm2 delete video-meta-generate || true
+          
+          # Start new process
+          if [ -f ecosystem.config.js ]; then
+            pm2 start ecosystem.config.js
+          else
+            pm2 start npm --name video-meta-generate -- start
+          fi
+          
+          # Save PM2 process list
+          pm2 save
+          
+          # Show status
+          pm2 status
+
+      - name: Cleanup old deployments
+        run: |
+          set -e
+          # Keep last 5 deployments
+          cd "${APP_DIR}"
+          ls -dt deploy-* 2>/dev/null | tail -n +6 | xargs rm -rf || true
+          echo "Cleanup completed"
