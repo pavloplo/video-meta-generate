@@ -1,6 +1,11 @@
 services:
   app:
     image: ${IMAGE:-ghcr.io/video-meta-generate:dev}
+    build:
+      context: .
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        DIRECT_URL: ${DIRECT_URL}
     container_name: app_nextjs
     restart: unless-stopped
     ports:
