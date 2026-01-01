@@ -18,27 +18,56 @@ if (!databaseUrl) {
 console.log('✅ Database URL found (length:', databaseUrl.length + ')');
 console.log('✅ Using:', databaseUrl === process.env.DIRECT_URL ? 'DIRECT_URL' : 'DATABASE_URL');
 
+// Show masked connection string for debugging (first 30 chars + last 20 chars)
+const maskedUrl = databaseUrl.length > 50 
+  ? databaseUrl.substring(0, 30) + '...' + databaseUrl.substring(databaseUrl.length - 20)
+  : databaseUrl.substring(0, 20) + '***';
+console.log('🔍 Connection string (masked):', maskedUrl);
+
 // Verify Supabase connection string format
-const urlPattern = /postgresql:\/\/[^:]+:[^@]+@[^:]+:\d+\/[^?]+/;
+const urlPattern = /^postgresql:\/\/[^:]+:[^@]+@[^:]+:\d+\/[^?]+/;
 if (!urlPattern.test(databaseUrl)) {
-  console.warn('⚠️  Warning: Database URL format may be incorrect');
-  console.warn('Expected format: postgresql://user:password@host:port/database');
+  console.error('❌ ERROR: Database URL format is incorrect');
+  console.error('Expected format: postgresql://user:password@host:port/database');
+  console.error('Received:', databaseUrl.substring(0, 50) + '...');
+  process.exit(1);
 }
 
 // Extract connection details for verification (masked)
 try {
-  const urlMatch = databaseUrl.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/([^?]+)/);
+  const urlMatch = databaseUrl.match(/^postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/([^?]+)(\?.*)?$/);
   if (urlMatch) {
-    const [, user, , host, port, database] = urlMatch;
+    const [, user, password, host, port, database, params] = urlMatch;
     console.log('🔍 Connection details:');
     console.log('  Host:', host);
     console.log('  Port:', port);
     console.log('  Database:', database);
     console.log('  User:', user);
-    console.log('  Password:', '***');
+    console.log('  Password length:', password.length);
+    console.log('  Has params:', !!params);
+    
+    // Validate Supabase-specific requirements
+    if (!host.includes('supabase.com') && !host.includes('pooler.supabase.com')) {
+      console.warn('⚠️  Warning: Host does not appear to be a Supabase host');
+      console.warn('  Expected: *.pooler.supabase.com or *.supabase.co');
+      console.warn('  Got:', host);
+    }
+    
+    if (port === '5432' && params?.includes('pgbouncer=true')) {
+      console.warn('⚠️  Warning: Port 5432 should not use pgbouncer=true');
+    }
+    
+    if (port === '6543' && !params?.includes('pgbouncer=true')) {
+      console.warn('⚠️  Warning: Port 6543 typically requires pgbouncer=true');
+    }
+  } else {
+    console.error('❌ ERROR: Could not parse database URL');
+    console.error('URL format:', databaseUrl.substring(0, 100));
+    process.exit(1);
   }
 } catch (e) {
-  // Ignore parsing errors
+  console.error('❌ ERROR: Failed to parse connection string:', e.message);
+  process.exit(1);
 }
 
 // Set environment variables explicitly for Prisma
@@ -63,11 +92,27 @@ try {
     fs.copyFileSync(configPath, backupPath);
   }
 
+  // Validate connection string has proper format before writing
+  if (!databaseUrl.includes('@')) {
+    console.error('❌ ERROR: Connection string is missing @ separator');
+    console.error('Expected: postgresql://user:password@host:port/database');
+    console.error('Got:', databaseUrl.substring(0, 100));
+    throw new Error('Invalid connection string format');
+  }
+
   // Create a new config file that definitely has the URL
+  // Use JSON.stringify to properly escape the string
+  const escapedUrl = JSON.stringify(databaseUrl);
+  
   const newConfig = `import { defineConfig } from "prisma/config";
 
 // Database URL is set via environment variable or fallback to direct value
-const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL || "${databaseUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}";
+// IMPORTANT: Environment variables take precedence over the fallback
+const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL || ${escapedUrl};
+
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL or DIRECT_URL must be set");
+}
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -76,6 +121,8 @@ export default defineConfig({
   },
 });
 `;
+  
+  console.log('🔍 Config file will use URL (first 50 chars):', databaseUrl.substring(0, 50) + '...');
   
   fs.writeFileSync(configPath, newConfig);
   console.log('✅ Updated Prisma config with database URL');
