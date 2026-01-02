@@ -172,20 +172,9 @@ export const ThumbnailVariantsPanel = ({
 
   return (
     <div className={`flex flex-col ${className}`}>
-      {/* Controls - Primary CTA Hierarchy */}
-      <div className="space-y-3 mb-6">
-        {/* Primary: Generate */}
-        <Button
-          onClick={handleGenerate}
-          disabled={!canGenerate || isGenerating}
-          size="lg"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
-        >
-          {isGenerating ? BUTTON_LABELS.GENERATING_ALL_METADATA : BUTTON_LABELS.GENERATE_THUMBNAILS}
-        </Button>
-
-        {/* Secondary: Regenerate - visually de-emphasized until variants exist */}
-        {variants.length > 0 && (
+      {/* Controls - Only Regenerate button now */}
+      {variants.length > 0 && (
+        <div className="space-y-3 mb-6">
           <Button
             onClick={handleRegenerate}
             disabled={!canRegenerate || isRegenerating || !canGenerate}
@@ -194,8 +183,8 @@ export const ThumbnailVariantsPanel = ({
           >
             {isRegenerating ? BUTTON_LABELS.GENERATING_MORE_VARIANTS : BUTTON_LABELS.ADD_MORE_VARIANTS}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Variants Grid - takes remaining height with max constraints for Zero Layout Shift */}
       <div className="flex-1 min-h-0 max-h-[600px] overflow-hidden">
@@ -212,16 +201,10 @@ export const ThumbnailVariantsPanel = ({
         {variants.length === 0 && !isGenerating && !isRegenerating && (
           <div className="flex items-center justify-center h-full text-center">
             <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 bg-slate-50">
-              <div className="text-slate-500 mb-4">
+              <div className="text-slate-500">
                 <p className="text-lg font-medium mb-2">Your thumbnail options will appear here</p>
+                <p className="text-sm">Use the Generate button to create thumbnails</p>
               </div>
-              <Button
-                disabled={!canGenerate}
-                variant="outline"
-                className="pointer-events-none opacity-50"
-              >
-{BUTTON_LABELS.GENERATE_THUMBNAILS}
-              </Button>
             </div>
           </div>
         )}

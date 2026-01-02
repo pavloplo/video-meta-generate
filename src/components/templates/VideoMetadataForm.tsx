@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { VideoInputPanel } from "@/components/molecules/VideoInputPanel";
 import { VideoPreviewPanel } from "@/components/molecules/VideoPreviewPanel";
-import { THUMBNAIL_SOURCE_TYPES, HOOK_TONES } from "@/constants/video";
+import { generateThumbnails } from "@/lib/thumbnails";
+import { THUMBNAIL_SOURCE_TYPES, HOOK_TONES, VALIDATION_RULES, ALERT_SCOPES, ALERT_KINDS } from "@/constants/video";
+import { BUTTON_LABELS, ALERT_MESSAGES } from "@/constants/ui";
 import type { ThumbnailVariant, SourceType, HookTone, InlineAlert } from "@/lib/types/thumbnails";
 
 export const VideoMetadataForm = () => {
@@ -16,6 +18,7 @@ export const VideoMetadataForm = () => {
   const [regenerationCount, setRegenerationCount] = useState(0);
   const [description, setDescription] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
+  const [isGeneratingAll, setIsGeneratingAll] = useState(false);
 
   // Asset upload state (mocked for now - would be connected to actual upload system)
   const [hasVideoUploaded, setHasVideoUploaded] = useState(false);
@@ -41,7 +44,7 @@ export const VideoMetadataForm = () => {
     if (newVariants.length > 0) {
       // Generate mock description based on tone and hook text
       const mockDescriptions = {
-        viral: `🚀 ${hookText || 'This Changed Everything!'} 
+        viral: `🚀 ${hookText || 'This Changed Everything!'}
 
 What you're about to discover will completely transform how you think about this topic. In this video, I break down the exact strategies that helped me achieve incredible results.
 
@@ -78,6 +81,44 @@ If you found this helpful, please give it a thumbs up and consider subscribing f
     }
   };
 
+  // Generate all metadata (thumbnails, description, tags)
+  const canGenerateAll = (() => {
+    if (!hookText.trim()) return false;
+    if (sourceType === THUMBNAIL_SOURCE_TYPES.VIDEO_FRAMES && !hasVideoUploaded) return false;
+    if (sourceType === THUMBNAIL_SOURCE_TYPES.IMAGES && (!hasImagesUploaded || assetIds.length === 0)) return false;
+    return true;
+  })();
+
+  const handleGenerateAll = async () => {
+    if (!canGenerateAll) return;
+
+    setIsGeneratingAll(true);
+
+    try {
+      const response = await generateThumbnails({
+        hookText: hookText.trim(),
+        tone,
+        source: {
+          type: sourceType,
+          assetIds,
+        },
+        count: VALIDATION_RULES.THUMBNAIL_VARIANTS_INITIAL,
+      });
+
+      const newVariants = response.variants.slice(0, VALIDATION_RULES.THUMBNAIL_VARIANTS_MAX);
+      handleVariantsChange(newVariants);
+
+      // Auto-select first variant if none selected
+      if (!selectedVariantId && newVariants.length > 0) {
+        setSelectedVariantId(newVariants[0].id);
+      }
+    } catch (error) {
+      console.error('Failed to generate all metadata:', error);
+    } finally {
+      setIsGeneratingAll(false);
+    }
+  };
+
   const handleSelectedVariantChange = (variantId: string | null) => {
     setSelectedVariantId(variantId);
   };
@@ -110,6 +151,9 @@ If you found this helpful, please give it a thumbs up and consider subscribing f
           }}
           hasVideoUploaded={hasVideoUploaded}
           hasImagesUploaded={hasImagesUploaded}
+          onGenerate={handleGenerateAll}
+          canGenerate={canGenerateAll}
+          isGenerating={isGeneratingAll}
         />
       </div>
 
@@ -126,6 +170,7 @@ If you found this helpful, please give it a thumbs up and consider subscribing f
           onRegenerationCountChange={setRegenerationCount}
           description={description}
           tags={tags}
+          isGeneratingAll={isGeneratingAll}
           hasVideoUploaded={hasVideoUploaded}
           hasImagesUploaded={hasImagesUploaded}
           assetIds={assetIds}

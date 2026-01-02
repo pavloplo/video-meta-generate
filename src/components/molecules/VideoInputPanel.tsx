@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
+import { Button } from "@/components/atoms/Button";
 import { HookTextControls } from "@/components/molecules/HookTextControls";
 import { InlineAlert as InlineAlertComponent } from "@/components/atoms/InlineAlert";
 import { THUMBNAIL_SOURCE_TYPES, HOOK_TONES } from "@/constants/video";
+import { BUTTON_LABELS } from "@/constants/ui";
 import type { SourceType, HookTone, InlineAlert } from "@/lib/types/thumbnails";
 
 export interface VideoInputPanelProps {
@@ -14,6 +16,9 @@ export interface VideoInputPanelProps {
   onFileUpload?: (type: 'video' | 'images') => void;
   hasVideoUploaded?: boolean;
   hasImagesUploaded?: boolean;
+  onGenerate?: () => void;
+  canGenerate?: boolean;
+  isGenerating?: boolean;
 }
 
 export const VideoInputPanel = ({
@@ -23,6 +28,9 @@ export const VideoInputPanel = ({
   onFileUpload,
   hasVideoUploaded = false,
   hasImagesUploaded = false,
+  onGenerate,
+  canGenerate = false,
+  isGenerating = false,
 }: VideoInputPanelProps) => {
   const [sourceType, setSourceType] = useState<SourceType>(THUMBNAIL_SOURCE_TYPES.VIDEO_FRAMES);
   const [hookText, setHookText] = useState("");
@@ -201,6 +209,20 @@ export const VideoInputPanel = ({
             </div>
           </div>
         </div>
+
+        {/* Generate Button */}
+        {onGenerate && (
+          <div className="pt-6 border-t border-slate-200">
+            <Button
+              onClick={onGenerate}
+              disabled={!canGenerate || isGenerating}
+              size="lg"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+            >
+              {isGenerating ? BUTTON_LABELS.GENERATING_ALL_METADATA : BUTTON_LABELS.GENERATE_THUMBNAILS}
+            </Button>
+          </div>
+        )}
 
       </CardContent>
     </Card>

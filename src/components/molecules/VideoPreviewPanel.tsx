@@ -67,9 +67,9 @@ export const VideoPreviewPanel = ({
       <CardHeader>
         <CardTitle id="preview-heading">Generated Metadata</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 space-y-6 overflow-y-auto">
+      <CardContent className="flex-1 overflow-y-auto">
         {/* Thumbnails Section */}
-        <div className="space-y-4">
+        <div className="space-y-4 mb-6">
           <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">1</span>
             Thumbnails
@@ -93,8 +93,8 @@ export const VideoPreviewPanel = ({
           </div>
         </div>
 
-        {/* Description Section - Zero Layout Shift */}
-        <div className="space-y-4">
+        {/* Description Section */}
+        <div className="space-y-4 mb-6">
           <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <span className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-sm font-bold">2</span>
             Description
@@ -133,7 +133,7 @@ export const VideoPreviewPanel = ({
           </div>
         </div>
 
-        {/* Tags Section - Zero Layout Shift */}
+        {/* Tags Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">3</span>
@@ -180,8 +180,8 @@ export const VideoPreviewPanel = ({
           </div>
         </div>
 
-        {/* Fixed alert slot for generate actions - Zero Layout Shift */}
-        <div className="h-10 flex items-start">
+        {/* Fixed alert slot for generate actions */}
+        <div className="h-10 flex items-start mt-6">
           {generateAlert ? (
             <InlineAlertComponent
               scope={generateAlert.scope}
