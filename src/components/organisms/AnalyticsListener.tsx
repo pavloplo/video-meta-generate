@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 
 import { track } from "@/lib/analytics";
-
-const scrollDepthThresholds = [25, 50, 75, 90];
+import { SCROLL_DEPTH_THRESHOLDS, ANALYTICS_EVENTS } from "@/constants/analytics";
 
 const getScrollDepth = () => {
   const { scrollHeight, scrollTop, clientHeight } =
@@ -25,10 +24,10 @@ export default function AnalyticsListener() {
     const handleScroll = () => {
       const depth = getScrollDepth();
 
-      scrollDepthThresholds.forEach((threshold) => {
+      SCROLL_DEPTH_THRESHOLDS.forEach((threshold) => {
         if (depth >= threshold && !seenDepths.has(threshold)) {
           seenDepths.add(threshold);
-          track("scroll_depth", { percent: threshold });
+          track(ANALYTICS_EVENTS.SCROLL_DEPTH, { percent: threshold });
         }
       });
     };
@@ -41,13 +40,13 @@ export default function AnalyticsListener() {
 
       const ctaTarget = target.closest<HTMLElement>("[data-cta]");
       if (ctaTarget) {
-        track("cta_click", { cta: ctaTarget.dataset.cta ?? "" });
+        track(ANALYTICS_EVENTS.CTA_CLICK, { cta: ctaTarget.dataset.cta ?? "" });
         return;
       }
 
       const exampleTarget = target.closest<HTMLElement>("[data-example]");
       if (exampleTarget) {
-        track("example_view", { example: exampleTarget.dataset.example ?? "" });
+        track(ANALYTICS_EVENTS.EXAMPLE_VIEW, { example: exampleTarget.dataset.example ?? "" });
       }
     };
 
@@ -58,7 +57,7 @@ export default function AnalyticsListener() {
       }
 
       if (details.open) {
-        track("faq_expand", { question: details.dataset.faq ?? "" });
+        track(ANALYTICS_EVENTS.FAQ_EXPAND, { question: details.dataset.faq ?? "" });
       }
     };
 

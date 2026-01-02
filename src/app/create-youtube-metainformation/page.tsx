@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { VideoMetadataForm } from "@/components/templates/VideoMetadataForm";
+
 export default async function CreateYoutubeMetainformationPage() {
   // Check for session cookie (middleware also checks, but this is a backup)
   // Full database session validation is handled separately
@@ -22,43 +24,7 @@ export default async function CreateYoutubeMetainformationPage() {
         Create metainformation for your youtube video
       </h1>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Inputs Panel */}
-        <section
-          aria-labelledby="inputs-heading"
-          className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-[0_20px_60px_-45px_rgba(15,23,42,0.4)]"
-        >
-          <h2
-            id="inputs-heading"
-            className="mb-4 text-2xl font-semibold text-slate-950"
-          >
-            Inputs
-          </h2>
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-slate-600">
-              Input fields will be added here.
-            </p>
-          </div>
-        </section>
-
-        {/* Preview Panel */}
-        <section
-          aria-labelledby="preview-heading"
-          className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-[0_20px_60px_-45px_rgba(15,23,42,0.4)]"
-        >
-          <h2
-            id="preview-heading"
-            className="mb-4 text-2xl font-semibold text-slate-950"
-          >
-            Preview
-          </h2>
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-slate-600">
-              Live preview will appear here.
-            </p>
-          </div>
-        </section>
-      </div>
+      <VideoMetadataForm />
     </main>
   );
 }

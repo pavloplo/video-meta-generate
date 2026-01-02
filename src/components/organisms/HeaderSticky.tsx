@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const navLinks = [
-  { label: "Proof", href: "#proof" },
-  { label: "Features", href: "#features" },
-  { label: "Examples", href: "#examples" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" }
-];
+import { NAVIGATION_LINKS } from "@/constants/navigation";
 
 export default function HeaderSticky() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,7 +20,7 @@ export default function HeaderSticky() {
           </p>
         </div>
         <nav className="hidden items-center gap-4 text-sm text-slate-600 md:flex">
-          {navLinks.map((link) => (
+          {NAVIGATION_LINKS.map((link) => (
             <Link
               key={link.href}
               className="transition hover:text-slate-950"
@@ -70,7 +64,7 @@ export default function HeaderSticky() {
       </div>
       {menuOpen ? (
         <div className="mt-4 flex flex-col gap-3 border-t border-slate-200/70 pt-4 text-sm text-slate-600 md:hidden">
-          {navLinks.map((link) => (
+          {NAVIGATION_LINKS.map((link) => (
             <Link
               key={link.href}
               className="transition hover:text-slate-950"

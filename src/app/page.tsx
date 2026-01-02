@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import AnalyticsListener from "@/components/landing/AnalyticsListener";
-import HeaderSticky from "@/components/landing/HeaderSticky";
+import AnalyticsListener from "@/components/organisms/AnalyticsListener";
+import HeaderSticky from "@/components/organisms/HeaderSticky";
 
 const proofStats = [
   { label: "Creator teams onboarded", value: "220+" },
