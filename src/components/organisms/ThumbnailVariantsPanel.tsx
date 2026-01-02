@@ -197,11 +197,11 @@ export const ThumbnailVariantsPanel = ({
         )}
       </div>
 
-      {/* Variants Grid - takes remaining height */}
-      <div className="flex-1 min-h-0">
+      {/* Variants Grid - takes remaining height with max constraints for Zero Layout Shift */}
+      <div className="flex-1 min-h-0 max-h-[600px] overflow-hidden">
         {/* Loading State */}
         {(isGenerating || isRegenerating) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr h-full max-h-[400px]">
             {Array.from({ length: VALIDATION_RULES.THUMBNAIL_VARIANTS_MAX }).map((_, i) => (
               <ThumbnailVariantSkeleton key={`skeleton-${i}`} />
             ))}
@@ -226,10 +226,10 @@ export const ThumbnailVariantsPanel = ({
           </div>
         )}
 
-        {/* Variants Grid - Always show 6 slots */}
+        {/* Variants Grid - Always show 6 slots with constrained height */}
         {variants.length > 0 && !isGenerating && !isRegenerating && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+          <div className="space-y-4 h-full flex flex-col">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr flex-1 max-h-[400px]">
               {/* Render actual variants */}
               {variants.map((variant) => (
                 <ThumbnailVariantCard
@@ -246,14 +246,18 @@ export const ThumbnailVariantsPanel = ({
               ))}
             </div>
 
-            {/* Limit Reached Message */}
-            {regenerationCount >= 6 && (
-              <InlineAlert
-                scope={ALERT_SCOPES.REGENERATE}
-                kind={ALERT_KINDS.WARNING}
-                message={ALERT_MESSAGES.REGENERATION_LIMIT_REACHED}
-              />
-            )}
+            {/* Limit Reached Message - Zero Layout Shift */}
+            <div className="h-10 flex items-start flex-shrink-0">
+              {regenerationCount >= 6 ? (
+                <InlineAlert
+                  scope={ALERT_SCOPES.REGENERATE}
+                  kind={ALERT_KINDS.WARNING}
+                  message={ALERT_MESSAGES.REGENERATION_LIMIT_REACHED}
+                />
+              ) : (
+                <div className="h-10" aria-hidden="true" />
+              )}
+            </div>
           </div>
         )}
       </div>

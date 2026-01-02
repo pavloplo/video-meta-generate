@@ -93,98 +93,104 @@ export const VideoPreviewPanel = ({
           </div>
         </div>
 
-        {/* Description Section */}
+        {/* Description Section - Zero Layout Shift */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <span className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-sm font-bold">2</span>
             Description
           </h3>
           <div className="pl-10">
-            {description ? (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{description}</p>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
+              {description ? (
+                <>
+                  <div className="prose prose-sm max-w-none flex-1">
+                    <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{description}</p>
+                  </div>
+                  <div className="mt-3 flex gap-2 flex-shrink-0">
+                    <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                      Copy
+                    </button>
+                    <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                      Edit
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-center">
+                  <div className="text-slate-500">
+                    {isGeneratingAll ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
+                        Generating description...
+                      </div>
+                    ) : (
+                      <p>Description will appear here after generation</p>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
-                    Copy
-                  </button>
-                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
-                    Edit
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-8 text-center">
-                <div className="text-slate-500">
-                  {isGeneratingAll ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
-                      Generating description...
-                    </div>
-                  ) : (
-                    <p>Description will appear here after generation</p>
-                  )}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Tags Section */}
+        {/* Tags Section - Zero Layout Shift */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">3</span>
             Tags
           </h3>
           <div className="pl-10">
-            {tags.length > 0 ? (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-slate-200 text-slate-700 text-sm rounded-full"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
+              {tags.length > 0 ? (
+                <>
+                  <div className="flex-1 flex flex-wrap gap-2 content-start">
+                    {tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-slate-200 text-slate-700 text-sm rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex gap-2 flex-shrink-0">
+                    <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                      Copy All
+                    </button>
+                    <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                      Edit
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-center">
+                  <div className="text-slate-500">
+                    {isGeneratingAll ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
+                        Generating tags...
+                      </div>
+                    ) : (
+                      <p>Tags will appear here after generation</p>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
-                    Copy All
-                  </button>
-                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
-                    Edit
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-8 text-center">
-                <div className="text-slate-500">
-                  {isGeneratingAll ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
-                      Generating tags...
-                    </div>
-                  ) : (
-                    <p>Tags will appear here after generation</p>
-                  )}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Fixed alert slot for generate actions */}
-        <div className="min-h-[2.5rem] flex items-start">
-          {generateAlert && (
+        {/* Fixed alert slot for generate actions - Zero Layout Shift */}
+        <div className="h-10 flex items-start">
+          {generateAlert ? (
             <InlineAlertComponent
               scope={generateAlert.scope}
               kind={generateAlert.kind}
               message={generateAlert.message}
               isVisible={generateAlert.isVisible}
             />
+          ) : (
+            <div className="h-10" aria-hidden="true" />
           )}
         </div>
       </CardContent>

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { VideoMetadataForm } from "@/components/templates/VideoMetadataForm";
+import { ResponsiveMetadataForm } from "@/components/templates/ResponsiveMetadataForm";
 
 export default async function CreateYoutubeMetainformationPage() {
   // Check for session cookie (middleware also checks, but this is a backup)
@@ -24,7 +24,7 @@ export default async function CreateYoutubeMetainformationPage() {
         Create metainformation for your youtube video
       </h1>
 
-      <VideoMetadataForm />
+      <ResponsiveMetadataForm />
     </main>
   );
 }

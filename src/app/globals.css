@@ -4,3 +4,45 @@
 body {
   font-family: "Inter", system-ui, sans-serif;
 }
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  /* Ensure full height usage on mobile */
+  html, body {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    overflow-x: hidden;
+  }
+
+  /* Safe area handling for notched devices */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Prevent horizontal scrolling on mobile */
+  * {
+    max-width: 100%;
+  }
+
+  /* Improve touch targets */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better text rendering on mobile */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Mobile-optimized scroll behavior */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}

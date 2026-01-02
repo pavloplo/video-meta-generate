@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
-import { SourceSelector } from "@/components/atoms/SourceSelector";
 import { HookTextControls } from "@/components/molecules/HookTextControls";
 import { InlineAlert as InlineAlertComponent } from "@/components/atoms/InlineAlert";
 import { THUMBNAIL_SOURCE_TYPES, HOOK_TONES } from "@/constants/video";
@@ -29,27 +28,41 @@ export const VideoInputPanel = ({
   const [hookText, setHookText] = useState("");
   const [tone, setTone] = useState<HookTone>(HOOK_TONES.VIRAL);
   const [sourceAlert, setSourceAlert] = useState<InlineAlert | null>(null);
-  const [sourceValidationMessage, setSourceValidationMessage] = useState<string | null>(null);
 
-  const handleSourceTypeChange = (newSourceType: SourceType) => {
+  const handleFileChange = (file: File) => {
+    const isVideo = file.type.startsWith('video/');
+    const newSourceType = isVideo ? THUMBNAIL_SOURCE_TYPES.VIDEO_FRAMES : THUMBNAIL_SOURCE_TYPES.IMAGES;
     setSourceType(newSourceType);
     onSourceTypeChange?.(newSourceType);
+    onFileUpload?.(isVideo ? 'video' : 'images');
 
-    // Show alert when source changes
+    // Show alert when file is uploaded
     const alert: InlineAlert = {
       scope: 'source',
       kind: 'info',
-      message: `Source set to ${newSourceType === THUMBNAIL_SOURCE_TYPES.VIDEO_FRAMES ? 'video frames' : 'uploaded images'}`,
+      message: `${file.name} uploaded successfully`,
       isVisible: true,
     };
     setSourceAlert(alert);
 
-    // Clear alert after a delay (except for errors)
-    if (alert.kind !== 'error') {
-      setTimeout(() => {
-        setSourceAlert({ ...alert, isVisible: false });
-        setTimeout(() => setSourceAlert(null), 200); // Wait for fade out
-      }, 3000);
+    // Clear alert after a delay
+    setTimeout(() => {
+      setSourceAlert({ ...alert, isVisible: false });
+      setTimeout(() => setSourceAlert(null), 200);
+    }, 3000);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileChange(file);
     }
   };
 
@@ -68,45 +81,62 @@ export const VideoInputPanel = ({
       <CardHeader>
         <CardTitle id="inputs-heading">Create thumbnails</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 space-y-6">
-        {/* Step 1: Choose source */}
-        <div className="space-y-4">
+      <CardContent className="flex-1 space-y-4 pb-0">
+        {/* Step 1: Upload file */}
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-sm font-medium">
               1
             </div>
-            <h3 className="text-sm font-medium text-slate-900">Choose source</h3>
+            <h3 className="text-sm font-medium text-slate-900">Upload file</h3>
           </div>
-          <SourceSelector
-            value={sourceType}
-            onChange={handleSourceTypeChange}
-            hasVideoUploaded={hasVideoUploaded}
-            hasImagesUploaded={hasImagesUploaded}
-            onValidationChange={setSourceValidationMessage}
-            onFileUpload={onFileUpload}
-          />
-          {/* Fixed alert slot for source */}
-          <div className="min-h-[2.5rem] flex items-start">
-            {sourceValidationMessage ? (
-              <InlineAlertComponent
-                scope="source"
-                kind="warning"
-                message={sourceValidationMessage}
-                isVisible={true}
-              />
-            ) : sourceAlert ? (
+          <div className="pl-9">
+            <label className="block">
+              <div
+                className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 hover:border-slate-400 transition-colors cursor-pointer"
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg className="w-10 h-10 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <p className="mb-2 text-sm text-slate-600">
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-slate-500 text-center px-4">
+                    Accepts video files (MP4, MOV, AVI, WebM) or image files (JPG, PNG, GIF, WebP)
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="video/mp4,video/quicktime,video/x-msvideo,video/webm,image/jpeg,image/png,image/gif,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleFileChange(file);
+                    }
+                  }}
+                />
+              </div>
+            </label>
+          </div>
+          {/* Alert slot for source */}
+          {sourceAlert && (
+            <div className="flex items-start">
               <InlineAlertComponent
                 scope={sourceAlert.scope}
                 kind={sourceAlert.kind}
                 message={sourceAlert.message}
                 isVisible={sourceAlert.isVisible}
               />
-            ) : null}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Step 2: Write hook text */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-sm font-medium">
               2
@@ -122,7 +152,7 @@ export const VideoInputPanel = ({
         </div>
 
         {/* Step 3: Choose tone */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-sm font-medium">
               3
