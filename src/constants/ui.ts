@@ -53,3 +53,21 @@ export const CHECKLIST_LABELS = {
   HOOK_TEXT: "Hook text",
   TONE_SELECTED: "Tone selected",
 } as const;
+
+// Upload status messages
+export const UPLOAD_STATUS = {
+  UPLOADING: "Uploading...",
+  ANALYZING: "Analyzing...",
+  PROCESSING: "Processing...",
+  COMPLETE: "Upload complete",
+  FAILED: "Upload failed",
+} as const;
+
+// Upload UI labels
+export const UPLOAD_LABELS = {
+  CLICK_OR_DRAG: "Click to upload or drag and drop",
+  REPLACE_FILE: "Replace",
+  REMOVE_FILE: "Remove",
+  FILE_SIZE: "File size:",
+  VIDEO_DURATION: "Duration:",
+} as const;

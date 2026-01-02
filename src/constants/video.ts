@@ -8,6 +8,38 @@ export const VALIDATION_RULES = {
   HOOK_TEXT_MAX_LENGTH: 200,
 } as const;
 
+export const UPLOAD_CONSTRAINTS = {
+  VIDEO_MAX_SIZE_MB: 500,
+  VIDEO_MAX_DURATION_SECONDS: 7200, // 2 hours
+  IMAGE_MAX_SIZE_MB: 10,
+  IMAGE_MAX_COUNT: 10,
+} as const;
+
+export const SUPPORTED_VIDEO_FORMATS = [
+  'video/mp4',
+  'video/quicktime',
+  'video/x-msvideo',
+  'video/webm',
+] as const;
+
+export const SUPPORTED_IMAGE_FORMATS = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+] as const;
+
+export const UPLOAD_ERROR_MESSAGES = {
+  FILE_TOO_LARGE: (maxSize: number, type: 'video' | 'image') =>
+    `${type === 'video' ? 'Video' : 'Image'} file size must be under ${maxSize}MB`,
+  VIDEO_TOO_LONG: (maxDuration: number) =>
+    `Video duration must be under ${Math.floor(maxDuration / 60)} minutes`,
+  UNSUPPORTED_FORMAT: (type: 'video' | 'image') =>
+    `Unsupported ${type} format. Please use a supported format.`,
+  VIDEO_LOAD_ERROR: 'Unable to load video file. Please try a different file.',
+  GENERIC_ERROR: 'An error occurred while processing the file.',
+} as const;
+
 export const VIDEO_METADATA_TYPES = {
   TITLE: 'title',
   DESCRIPTION: 'description',

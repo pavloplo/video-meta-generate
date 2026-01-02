@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
 import { Button } from "@/components/atoms/Button";
 import { HookTextControls } from "@/components/molecules/HookTextControls";
 import { InlineAlert as InlineAlertComponent } from "@/components/atoms/InlineAlert";
-import { THUMBNAIL_SOURCE_TYPES, HOOK_TONES } from "@/constants/video";
+import { FileUploadSummary, type UploadedFileInfo } from "@/components/atoms/FileUploadSummary";
+import { UploadProgress, type UploadStage } from "@/components/atoms/UploadProgress";
+import { THUMBNAIL_SOURCE_TYPES, HOOK_TONES, UPLOAD_CONSTRAINTS, SUPPORTED_VIDEO_FORMATS, SUPPORTED_IMAGE_FORMATS } from "@/constants/video";
 import { BUTTON_LABELS, GENERATION_HELPER, CHECKLIST_LABELS } from "@/constants/ui";
+import { validateFile, generateVideoThumbnail, generateImageThumbnail } from "@/lib/fileValidation";
 import type { SourceType, HookTone, InlineAlert } from "@/lib/types/thumbnails";
 
 export interface GenerationOptions {
@@ -46,28 +49,111 @@ export const VideoInputPanel = ({
   const [hookText, setHookText] = useState("");
   const [tone, setTone] = useState<HookTone>(HOOK_TONES.VIRAL);
   const [sourceAlert, setSourceAlert] = useState<InlineAlert | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<{ stage: UploadStage; progress: number } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (file: File) => {
-    const isVideo = file.type.startsWith('video/');
-    const newSourceType = isVideo ? THUMBNAIL_SOURCE_TYPES.VIDEO_FRAMES : THUMBNAIL_SOURCE_TYPES.IMAGES;
-    setSourceType(newSourceType);
-    onSourceTypeChange?.(newSourceType);
-    onFileUpload?.(isVideo ? 'video' : 'images');
+  const handleFileChange = async (file: File) => {
+    // Reset previous state
+    setSourceAlert(null);
+    setUploadedFile(null);
+    setIsUploading(true);
 
-    // Show alert when file is uploaded
-    const alert: InlineAlert = {
-      scope: 'source',
-      kind: 'info',
-      message: `${file.name} uploaded successfully`,
-      isVisible: true,
-    };
-    setSourceAlert(alert);
+    try {
+      // Stage 1: Uploading (simulate initial upload)
+      setUploadProgress({ stage: 'uploading', progress: 0 });
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setUploadProgress({ stage: 'uploading', progress: 30 });
 
-    // Clear alert after a delay
-    setTimeout(() => {
-      setSourceAlert({ ...alert, isVisible: false });
-      setTimeout(() => setSourceAlert(null), 200);
-    }, 3000);
+      // Stage 2: Validate file
+      setUploadProgress({ stage: 'analyzing', progress: 40 });
+      const validationResult = await validateFile(file);
+
+      if (!validationResult.isValid) {
+        setIsUploading(false);
+        setUploadProgress(null);
+        const alert: InlineAlert = {
+          scope: 'source',
+          kind: 'error',
+          message: validationResult.error || 'File validation failed',
+          isVisible: true,
+        };
+        setSourceAlert(alert);
+        return;
+      }
+
+      setUploadProgress({ stage: 'analyzing', progress: 60 });
+
+      // Stage 3: Extract metadata and generate thumbnail
+      setUploadProgress({ stage: 'processing', progress: 70 });
+      const isVideo = file.type.startsWith('video/');
+      let thumbnailUrl: string | undefined;
+
+      try {
+        if (isVideo) {
+          thumbnailUrl = await generateVideoThumbnail(file);
+        } else {
+          thumbnailUrl = await generateImageThumbnail(file);
+        }
+      } catch (error) {
+        console.error('Thumbnail generation failed:', error);
+        // Continue without thumbnail
+      }
+
+      setUploadProgress({ stage: 'processing', progress: 90 });
+
+      // Update source type
+      const newSourceType = isVideo ? THUMBNAIL_SOURCE_TYPES.VIDEO_FRAMES : THUMBNAIL_SOURCE_TYPES.IMAGES;
+      setSourceType(newSourceType);
+      onSourceTypeChange?.(newSourceType);
+
+      // Stage 4: Complete
+      setUploadProgress({ stage: 'complete', progress: 100 });
+
+      // Set uploaded file info
+      const fileInfo: UploadedFileInfo = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        duration: validationResult.duration,
+        thumbnailUrl,
+      };
+      setUploadedFile(fileInfo);
+
+      // Notify parent
+      onFileUpload?.(isVideo ? 'video' : 'images');
+
+      // Clear progress after a short delay
+      setTimeout(() => {
+        setUploadProgress(null);
+        setIsUploading(false);
+      }, 1000);
+
+    } catch (error) {
+      console.error('File upload error:', error);
+      setIsUploading(false);
+      setUploadProgress(null);
+      const alert: InlineAlert = {
+        scope: 'source',
+        kind: 'error',
+        message: error instanceof Error ? error.message : 'An error occurred while processing the file',
+        isVisible: true,
+      };
+      setSourceAlert(alert);
+    }
+  };
+
+  const handleReplaceFile = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
+    setSourceAlert(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -109,48 +195,80 @@ export const VideoInputPanel = ({
             <h3 className="text-sm font-medium text-slate-900">Upload file</h3>
           </div>
           <div className="pl-9">
-            <label className="block">
-              <div
-                className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 hover:border-slate-400 transition-colors cursor-pointer"
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg className="w-10 h-10 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <p className="mb-2 text-sm text-slate-600">
-                    <span className="font-semibold">Click to upload</span> or drag and drop
-                  </p>
-                  <p className="text-xs text-slate-500 text-center px-4">
-                    Accepts video files (MP4, MOV, AVI, WebM) or image files (JPG, PNG, GIF, WebP)
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="video/mp4,video/quicktime,video/x-msvideo,video/webm,image/jpeg,image/png,image/gif,image/webp"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleFileChange(file);
-                    }
-                  }}
+            {!uploadedFile && !isUploading && (
+              <>
+                <label className="block">
+                  <div
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 hover:border-slate-400 transition-colors cursor-pointer"
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg className="w-10 h-10 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <p className="mb-2 text-sm text-slate-600">
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-slate-500 text-center px-4 mb-3">
+                        Video files (MP4, MOV, AVI, WebM) or images (JPG, PNG, GIF, WebP)
+                      </p>
+                      <div className="mt-2 px-4 text-center space-y-1">
+                        <p className="text-xs text-slate-500">
+                          <span className="font-medium">Video:</span> Max {UPLOAD_CONSTRAINTS.VIDEO_MAX_SIZE_MB}MB, up to {Math.floor(UPLOAD_CONSTRAINTS.VIDEO_MAX_DURATION_SECONDS / 60)} minutes
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          <span className="font-medium">Image:</span> Max {UPLOAD_CONSTRAINTS.IMAGE_MAX_SIZE_MB}MB per file
+                        </p>
+                      </div>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      accept={[...SUPPORTED_VIDEO_FORMATS, ...SUPPORTED_IMAGE_FORMATS].join(',')}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          handleFileChange(file);
+                        }
+                      }}
+                    />
+                  </div>
+                </label>
+              </>
+            )}
+
+            {/* Upload Progress */}
+            {uploadProgress && (
+              <UploadProgress
+                stage={uploadProgress.stage}
+                progress={uploadProgress.progress}
+                fileName={uploadedFile?.name}
+              />
+            )}
+
+            {/* File Summary */}
+            {uploadedFile && !isUploading && (
+              <FileUploadSummary
+                file={uploadedFile}
+                onReplace={handleReplaceFile}
+                onRemove={handleRemoveFile}
+              />
+            )}
+
+            {/* Alert slot for validation errors */}
+            {sourceAlert && (
+              <div className="flex items-start mt-3">
+                <InlineAlertComponent
+                  scope={sourceAlert.scope}
+                  kind={sourceAlert.kind}
+                  message={sourceAlert.message}
+                  isVisible={sourceAlert.isVisible}
                 />
               </div>
-            </label>
+            )}
           </div>
-          {/* Alert slot for source */}
-          {sourceAlert && (
-            <div className="flex items-start">
-              <InlineAlertComponent
-                scope={sourceAlert.scope}
-                kind={sourceAlert.kind}
-                message={sourceAlert.message}
-                isVisible={sourceAlert.isVisible}
-              />
-            </div>
-          )}
         </div>
 
         {/* Step 2: Write hook text */}
