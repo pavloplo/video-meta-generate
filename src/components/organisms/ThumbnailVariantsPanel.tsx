@@ -13,6 +13,7 @@ import {
   ALERT_SCOPES,
   ALERT_KINDS
 } from "@/constants/video";
+import { BUTTON_LABELS, ALERT_MESSAGES } from "@/constants/ui";
 import type {
   ThumbnailVariant,
   SourceType,
@@ -72,7 +73,7 @@ export const ThumbnailVariantsPanel = ({
     onInlineAlert({
       scope: ALERT_SCOPES.GENERATE,
       kind: ALERT_KINDS.INFO,
-      message: "Generating thumbnails, description, and tags...",
+      message: ALERT_MESSAGES.GENERATING_THUMBNAILS,
     });
 
     try {
@@ -97,13 +98,13 @@ export const ThumbnailVariantsPanel = ({
       onInlineAlert({
         scope: ALERT_SCOPES.GENERATE,
         kind: ALERT_KINDS.SUCCESS,
-        message: "All metadata generated successfully!",
+        message: ALERT_MESSAGES.ALL_METADATA_GENERATED,
       });
     } catch (error) {
       onInlineAlert({
         scope: ALERT_SCOPES.GENERATE,
         kind: ALERT_KINDS.ERROR,
-        message: error instanceof Error ? error.message : "Failed to generate thumbnails",
+        message: error instanceof Error ? error.message : ALERT_MESSAGES.GENERATION_FAILED,
       });
     } finally {
       setIsGenerating(false);
@@ -115,7 +116,7 @@ export const ThumbnailVariantsPanel = ({
       onInlineAlert({
         scope: ALERT_SCOPES.REGENERATE,
         kind: ALERT_KINDS.WARNING,
-        message: "You've reached the limit. Choose a thumbnail to continue.",
+        message: ALERT_MESSAGES.REGENERATION_LIMIT_REACHED,
       });
       return;
     }
@@ -129,7 +130,7 @@ export const ThumbnailVariantsPanel = ({
     onInlineAlert({
       scope: ALERT_SCOPES.REGENERATE,
       kind: ALERT_KINDS.INFO,
-      message: `Generating ${count} more thumbnails...`,
+      message: ALERT_MESSAGES.GENERATING_MORE_THUMBNAILS,
     });
 
     try {
@@ -152,13 +153,13 @@ export const ThumbnailVariantsPanel = ({
       onInlineAlert({
         scope: ALERT_SCOPES.REGENERATE,
         kind: ALERT_KINDS.SUCCESS,
-        message: `Generated ${Math.min(count, response.variants.length)} more thumbnails`,
+        message: ALERT_MESSAGES.VARIANTS_ADDED(Math.min(count, response.variants.length)),
       });
     } catch (error) {
       onInlineAlert({
         scope: ALERT_SCOPES.REGENERATE,
         kind: ALERT_KINDS.ERROR,
-        message: error instanceof Error ? error.message : "Failed to regenerate thumbnails",
+        message: error instanceof Error ? error.message : ALERT_MESSAGES.REGENERATION_FAILED,
       });
     } finally {
       setIsRegenerating(false);
@@ -180,7 +181,7 @@ export const ThumbnailVariantsPanel = ({
           size="lg"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
         >
-          {isGenerating ? "Generating all metadata..." : "Generate all metadata"}
+          {isGenerating ? BUTTON_LABELS.GENERATING_ALL_METADATA : BUTTON_LABELS.GENERATE_THUMBNAILS}
         </Button>
 
         {/* Secondary: Regenerate - visually de-emphasized until variants exist */}
@@ -191,7 +192,7 @@ export const ThumbnailVariantsPanel = ({
             variant="outline"
             className="w-full opacity-75 hover:opacity-100 transition-opacity"
           >
-            {isRegenerating ? "Generating more thumbnails..." : "Generate more thumbnails"}
+            {isRegenerating ? BUTTON_LABELS.GENERATING_MORE_VARIANTS : BUTTON_LABELS.ADD_MORE_VARIANTS}
           </Button>
         )}
       </div>
@@ -219,7 +220,7 @@ export const ThumbnailVariantsPanel = ({
                 variant="outline"
                 className="pointer-events-none opacity-50"
               >
-                Generate all metadata
+{BUTTON_LABELS.GENERATE_THUMBNAILS}
               </Button>
             </div>
           </div>
@@ -250,7 +251,7 @@ export const ThumbnailVariantsPanel = ({
               <InlineAlert
                 scope={ALERT_SCOPES.REGENERATE}
                 kind={ALERT_KINDS.WARNING}
-                message="You've reached the limit. Choose a thumbnail to continue."
+                message={ALERT_MESSAGES.REGENERATION_LIMIT_REACHED}
               />
             )}
           </div>
