@@ -8,6 +8,7 @@ import { DescriptionSkeleton } from "@/components/atoms/DescriptionSkeleton";
 import { TagsSkeleton } from "@/components/atoms/TagsSkeleton";
 import { SectionError } from "@/components/atoms/SectionError";
 import { Accordion } from "@/components/atoms/Accordion";
+import { OptimizationNotes } from "@/components/atoms/OptimizationNotes";
 import { GENERATION_HELPER } from "@/constants/ui";
 import type { ThumbnailVariant, SourceType, HookTone, InlineAlert as InlineAlertType, SectionStatus } from "@/lib/types/thumbnails";
 
@@ -336,6 +337,18 @@ export const VideoPreviewPanel = ({
             </div>
           </div>
         )}
+
+        {/* Optimization Notes - Show after successful generation */}
+        <OptimizationNotes
+          tone={tone}
+          hasHookText={!!hookText.trim()}
+          hasTags={tagsStatus === "success" && tags.length > 0}
+          show={
+            (thumbnailsStatus === "success" && variants.length > 0) ||
+            (descriptionStatus === "success" && !!description) ||
+            (tagsStatus === "success" && tags.length > 0)
+          }
+        />
 
         {/* Fixed alert slot for generate actions */}
         <div className="h-8 flex items-start">
