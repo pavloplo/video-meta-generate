@@ -8,6 +8,7 @@ describe('HookTextControls', () => {
     onHookTextChange: jest.fn(),
     tone: HOOK_TONES.VIRAL,
     onToneChange: jest.fn(),
+    showToneSelector: true,
     inlineAlert: null,
     onAlertDismiss: jest.fn(),
   };

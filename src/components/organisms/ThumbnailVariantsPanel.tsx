@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/atoms/Button";
 import { ThumbnailVariantCard } from "@/components/atoms/ThumbnailVariantCard";
+import { ThumbnailVariantSkeleton } from "@/components/atoms/ThumbnailVariantSkeleton";
+import { ThumbnailVariantPlaceholder } from "@/components/atoms/ThumbnailVariantPlaceholder";
 import { InlineAlert } from "@/components/atoms/InlineAlert";
 import { generateThumbnails, regenerateThumbnails } from "@/lib/thumbnails";
 import {
@@ -189,9 +191,38 @@ export const ThumbnailVariantsPanel = ({
 
       {/* Variants Grid - takes remaining height */}
       <div className="flex-1 min-h-0">
-        {variants.length > 0 && (
-          <div className="space-y-4 h-full">
+        {/* Loading State */}
+        {(isGenerating || isRegenerating) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+            {Array.from({ length: VALIDATION_RULES.THUMBNAIL_VARIANTS_MAX }).map((_, i) => (
+              <ThumbnailVariantSkeleton key={`skeleton-${i}`} />
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {variants.length === 0 && !isGenerating && !isRegenerating && (
+          <div className="flex items-center justify-center h-full text-center">
+            <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 bg-slate-50">
+              <div className="text-slate-500 mb-4">
+                <p className="text-lg font-medium mb-2">Your thumbnail options will appear here</p>
+              </div>
+              <Button
+                disabled={!canGenerate}
+                variant="outline"
+                className="pointer-events-none opacity-50"
+              >
+                Generate all metadata
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Variants Grid - Always show 6 slots */}
+        {variants.length > 0 && !isGenerating && !isRegenerating && (
+          <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
+              {/* Render actual variants */}
               {variants.map((variant) => (
                 <ThumbnailVariantCard
                   key={variant.id}
@@ -199,6 +230,11 @@ export const ThumbnailVariantsPanel = ({
                   isSelected={selectedVariantId === variant.id}
                   onSelect={() => handleVariantSelect(variant.id)}
                 />
+              ))}
+
+              {/* Render placeholders for remaining slots */}
+              {Array.from({ length: VALIDATION_RULES.THUMBNAIL_VARIANTS_MAX - variants.length }).map((_, i) => (
+                <ThumbnailVariantPlaceholder key={`placeholder-${i}`} />
               ))}
             </div>
 
@@ -210,25 +246,6 @@ export const ThumbnailVariantsPanel = ({
                 message="Maximum of 6 thumbnails reached. Choose one to continue."
               />
             )}
-          </div>
-        )}
-
-        {/* Loading Skeletons */}
-        {(isGenerating || isRegenerating) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
-            {Array.from({ length: isGenerating ? VALIDATION_RULES.THUMBNAIL_VARIANTS_INITIAL : VALIDATION_RULES.THUMBNAIL_VARIANTS_REGENERATE }).map((_, i) => (
-              <div key={i} className="aspect-video rounded-lg bg-slate-200 animate-pulse" />
-            ))}
-          </div>
-        )}
-
-        {/* Empty state hint */}
-        {variants.length === 0 && !isGenerating && (
-          <div className="flex items-center justify-center h-full text-center">
-            <div className="text-slate-500">
-              <p className="text-lg font-medium mb-2">Ready to generate thumbnails</p>
-              <p className="text-sm">Complete the steps on the left, then click &ldquo;Generate thumbnails&rdquo;</p>
-            </div>
           </div>
         )}
       </div>

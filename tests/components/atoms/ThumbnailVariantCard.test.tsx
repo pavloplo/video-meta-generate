@@ -30,33 +30,26 @@ describe('ThumbnailVariantCard', () => {
     expect(screen.getByText('Good')).toBeInTheDocument();
   });
 
-  it('shows radio button for selection', () => {
+  it('shows unselected state styling', () => {
     render(<ThumbnailVariantCard {...defaultProps} />);
 
-    const radio = screen.getByRole('radio');
-    expect(radio).toBeInTheDocument();
-    expect(radio).toHaveAttribute('name', 'thumbnail-variant');
-    expect(radio).not.toBeChecked();
+    const imageContainer = screen.getByAltText('Thumbnail variant variant-1').parentElement;
+    expect(imageContainer).toHaveClass('border-slate-200');
+    expect(imageContainer).not.toHaveClass('border-blue-500');
+
+    // Should not show checkmark or selected label
+    expect(screen.queryByText('Selected')).not.toBeInTheDocument();
   });
 
   it('shows selected state', () => {
     render(<ThumbnailVariantCard {...defaultProps} isSelected={true} />);
 
-    const radio = screen.getByRole('radio');
-    expect(radio).toBeChecked();
+    // Should show selected styling
+    const imageContainer = screen.getByAltText('Thumbnail variant variant-1').parentElement;
+    expect(imageContainer).toHaveClass('border-blue-500', 'ring-2', 'ring-blue-500/20');
 
-    // Find the image container div with aspect-video class
-    const imageContainer = document.querySelector('.aspect-video');
-    expect(imageContainer).toHaveClass('border-slate-500', 'ring-2', 'ring-slate-500/20');
-  });
-
-  it('calls onSelect when radio is changed', () => {
-    render(<ThumbnailVariantCard {...defaultProps} />);
-
-    const radio = screen.getByRole('radio');
-    fireEvent.click(radio);
-
-    expect(defaultProps.onSelect).toHaveBeenCalled();
+    // Should show checkmark overlay and selected label
+    expect(screen.getByText('Selected')).toBeInTheDocument();
   });
 
   it('calls onSelect when image container is clicked', () => {
