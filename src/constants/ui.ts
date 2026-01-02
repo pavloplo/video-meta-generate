@@ -39,6 +39,10 @@ export const ALERT_MESSAGES = {
   // Mobile-specific messages
   METADATA_GENERATED_SUCCESS: "Metadata generated successfully!",
   METADATA_GENERATION_FAILED: "Failed to generate metadata",
+  // Section-specific error messages
+  THUMBNAILS_GENERATION_FAILED: "Failed to generate thumbnails",
+  DESCRIPTION_GENERATION_FAILED: "Failed to generate description",
+  TAGS_GENERATION_FAILED: "Failed to generate tags",
 } as const;
 
 // Helper text for generation requirements
@@ -70,4 +74,12 @@ export const UPLOAD_LABELS = {
   REMOVE_FILE: "Remove",
   FILE_SIZE: "File size:",
   VIDEO_DURATION: "Duration:",
+} as const;
+
+// Section state labels
+export const SECTION_STATUS = {
+  IDLE: "idle",
+  LOADING: "loading",
+  SUCCESS: "success",
+  ERROR: "error",
 } as const;

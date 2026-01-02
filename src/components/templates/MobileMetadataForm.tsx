@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { VideoInputPanel, type GenerationOptions } from "@/components/molecules/VideoInputPanel";
 import { VideoPreviewPanel } from "@/components/molecules/VideoPreviewPanel";
 import { Button } from "@/components/atoms/Button";
-import { THUMBNAIL_SOURCE_TYPES, HOOK_TONES } from "@/constants/video";
-import { BUTTON_LABELS, MOBILE_TABS } from "@/constants/ui";
-import type { ThumbnailVariant, SourceType, HookTone } from "@/lib/types/thumbnails";
+import { generateThumbnails } from "@/lib/thumbnails";
+import { THUMBNAIL_SOURCE_TYPES, HOOK_TONES, VALIDATION_RULES } from "@/constants/video";
+import { BUTTON_LABELS, MOBILE_TABS, ALERT_MESSAGES } from "@/constants/ui";
+import type { ThumbnailVariant, SourceType, HookTone, SectionStatus } from "@/lib/types/thumbnails";
 
 interface MobileSessionState {
     sourceType: SourceType;
@@ -22,6 +23,12 @@ interface MobileSessionState {
     tags: string[];
     lastGeneratedAt?: Date;
     generationOptions: GenerationOptions;
+    thumbnailsStatus: SectionStatus;
+    descriptionStatus: SectionStatus;
+    tagsStatus: SectionStatus;
+    thumbnailsError: string | null;
+    descriptionError: string | null;
+    tagsError: string | null;
 }
 
 const STORAGE_KEY = 'mobile_metadata_session';
@@ -45,6 +52,12 @@ export const MobileMetadataForm = () => {
             description: true,
             tags: true,
         },
+        thumbnailsStatus: "idle",
+        descriptionStatus: "idle",
+        tagsStatus: "idle",
+        thumbnailsError: null,
+        descriptionError: null,
+        tagsError: null,
     });
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -118,49 +131,123 @@ export const MobileMetadataForm = () => {
         return hasAssets && hookTextValid;
     };
 
+    const generateThumbnailsSection = async () => {
+        updateSessionState({ thumbnailsStatus: "loading", thumbnailsError: null });
+
+        try {
+            const response = await generateThumbnails({
+                hookText: sessionState.hookText.trim(),
+                tone: sessionState.tone,
+                source: {
+                    type: sessionState.sourceType,
+                    assetIds: sessionState.assetIds,
+                },
+                count: VALIDATION_RULES.THUMBNAIL_VARIANTS_INITIAL,
+            });
+
+            const newVariants = response.variants.slice(0, VALIDATION_RULES.THUMBNAIL_VARIANTS_MAX);
+            updateSessionState({
+                variants: newVariants,
+                selectedVariantId: newVariants.length > 0 ? newVariants[0].id : null,
+                thumbnailsStatus: "success",
+            });
+        } catch (error) {
+            updateSessionState({
+                thumbnailsError: error instanceof Error ? error.message : ALERT_MESSAGES.THUMBNAILS_GENERATION_FAILED,
+                thumbnailsStatus: "error",
+            });
+        }
+    };
+
+    const generateDescription = async () => {
+        updateSessionState({ descriptionStatus: "loading", descriptionError: null });
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Simulate random failure for testing (10% chance)
+            if (Math.random() < 0.1) {
+                throw new Error("Failed to generate description");
+            }
+
+            const mockDescriptions = {
+                viral: `🚀 ${sessionState.hookText || 'This Changed Everything!'}
+
+What you're about to discover will completely transform how you think about this topic. In this video, I break down the exact strategies that helped me achieve incredible results.`,
+                curiosity: `❓ ${sessionState.hookText || 'You Won\'t Believe What I Found'}
+
+Have you ever wondered why some people seem to have all the answers? Today, I'm diving deep into a discovery that completely changed my perspective.`,
+                educational: `📚 ${sessionState.hookText || 'The Complete Guide You\'ve Been Waiting For'}
+
+Welcome to the most comprehensive guide on this topic. Whether you're just getting started or looking to deepen your knowledge, this video covers everything you need to know.`
+            };
+
+            updateSessionState({
+                description: mockDescriptions[sessionState.tone],
+                descriptionStatus: "success",
+            });
+        } catch (error) {
+            updateSessionState({
+                descriptionError: error instanceof Error ? error.message : ALERT_MESSAGES.DESCRIPTION_GENERATION_FAILED,
+                descriptionStatus: "error",
+            });
+        }
+    };
+
+    const generateTags = async () => {
+        updateSessionState({ tagsStatus: "loading", tagsError: null });
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1200));
+
+            // Simulate random failure for testing (10% chance)
+            if (Math.random() < 0.1) {
+                throw new Error("Failed to generate tags");
+            }
+
+            const baseTags = ['tutorial', 'guide', 'howto', 'tips', 'education'];
+            const toneTags = {
+                viral: ['viral', 'trending', 'mustwatch', 'gamechanger', 'lifechanging'],
+                curiosity: ['interesting', 'discovery', 'mystery', 'explained', 'revealed'],
+                educational: ['learn', 'study', 'knowledge', 'skills', 'masterclass']
+            };
+
+            updateSessionState({
+                tags: [...baseTags, ...toneTags[sessionState.tone], '2024', 'new', 'best'],
+                tagsStatus: "success",
+            });
+        } catch (error) {
+            updateSessionState({
+                tagsError: error instanceof Error ? error.message : ALERT_MESSAGES.TAGS_GENERATION_FAILED,
+                tagsStatus: "error",
+            });
+        }
+    };
+
     const handleGenerate = async () => {
         if (!canGenerate()) return;
         setIsGenerating(true);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            updateSessionState({ lastGeneratedAt: new Date() });
 
-            const updates: Partial<MobileSessionState> = {
-                lastGeneratedAt: new Date(),
-            };
+            // Generate all selected sections in parallel
+            const promises: Promise<void>[] = [];
 
-            // Only generate thumbnails if the option is selected
             if (sessionState.generationOptions.thumbnails) {
-                const mockVariants: ThumbnailVariant[] = [
-                    { id: 'variant-1', imageUrl: '/api/placeholder/thumbnail-1' },
-                    { id: 'variant-2', imageUrl: '/api/placeholder/thumbnail-2' },
-                ];
-                updates.variants = mockVariants;
-                updates.selectedVariantId = mockVariants[0].id;
+                promises.push(generateThumbnailsSection());
             }
 
-            // Only generate description if the option is selected
             if (sessionState.generationOptions.description) {
-                const mockDescriptions = {
-                    viral: `${sessionState.hookText || 'This Changed Everything!'} What you're about to discover will completely transform how you think about this topic.`,
-                    curiosity: `${sessionState.hookText || 'You Won\'t Believe What I Found'} Have you ever wondered why some people seem to have all the answers?`,
-                    educational: `${sessionState.hookText || 'The Complete Guide You\'ve Been Waiting For'} Welcome to the most comprehensive guide on this topic.`
-                };
-                updates.description = mockDescriptions[sessionState.tone];
+                promises.push(generateDescription());
             }
 
-            // Only generate tags if the option is selected
             if (sessionState.generationOptions.tags) {
-                const baseTags = ['tutorial', 'guide', 'howto', 'tips', 'education'];
-                const toneTags = {
-                    viral: ['viral', 'trending', 'mustwatch', 'gamechanger', 'lifechanging'],
-                    curiosity: ['interesting', 'discovery', 'mystery', 'explained', 'revealed'],
-                    educational: ['learn', 'study', 'knowledge', 'skills', 'masterclass']
-                };
-                updates.tags = [...baseTags, ...toneTags[sessionState.tone], '2024', 'new', 'best'];
+                promises.push(generateTags());
             }
 
-            updateSessionState(updates);
+            // Wait for all generations to complete (don't fail if one fails)
+            await Promise.allSettled(promises);
 
             if (typeof window !== 'undefined' && (window as any).gtag) {
                 (window as any).gtag('event', 'mobile_generation_success', {
@@ -270,6 +357,15 @@ export const MobileMetadataForm = () => {
                             hasVideoUploaded={sessionState.hasVideoUploaded}
                             hasImagesUploaded={sessionState.hasImagesUploaded}
                             assetIds={sessionState.assetIds}
+                            thumbnailsStatus={sessionState.thumbnailsStatus}
+                            descriptionStatus={sessionState.descriptionStatus}
+                            tagsStatus={sessionState.tagsStatus}
+                            thumbnailsError={sessionState.thumbnailsError}
+                            descriptionError={sessionState.descriptionError}
+                            tagsError={sessionState.tagsError}
+                            onRetryThumbnails={generateThumbnailsSection}
+                            onRetryDescription={generateDescription}
+                            onRetryTags={generateTags}
                         />
                         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 safe-area-inset-bottom">
                             <Button

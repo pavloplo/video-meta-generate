@@ -50,3 +50,17 @@ export interface ThumbnailApiResponse {
   variants?: ThumbnailVariant[];
   error?: ThumbnailError;
 }
+
+export type SectionStatus = "idle" | "loading" | "success" | "error";
+
+export interface SectionState<T> {
+  status: SectionStatus;
+  data: T | null;
+  error: string | null;
+}
+
+export interface MetadataSectionStates {
+  thumbnails: SectionState<ThumbnailVariant[]>;
+  description: SectionState<string>;
+  tags: SectionState<string[]>;
+}

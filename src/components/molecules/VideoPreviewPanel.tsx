@@ -4,8 +4,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
 import { ThumbnailVariantsPanel } from "@/components/organisms/ThumbnailVariantsPanel";
 import { InlineAlert as InlineAlertComponent } from "@/components/atoms/InlineAlert";
+import { DescriptionSkeleton } from "@/components/atoms/DescriptionSkeleton";
+import { TagsSkeleton } from "@/components/atoms/TagsSkeleton";
+import { SectionError } from "@/components/atoms/SectionError";
 import { GENERATION_HELPER } from "@/constants/ui";
-import type { ThumbnailVariant, SourceType, HookTone, InlineAlert as InlineAlertType } from "@/lib/types/thumbnails";
+import type { ThumbnailVariant, SourceType, HookTone, InlineAlert as InlineAlertType, SectionStatus } from "@/lib/types/thumbnails";
 
 export interface VideoPreviewPanelProps {
   sourceType: SourceType;
@@ -23,6 +26,17 @@ export interface VideoPreviewPanelProps {
   hasVideoUploaded?: boolean;
   hasImagesUploaded?: boolean;
   assetIds?: string[];
+  // Per-section states
+  thumbnailsStatus?: SectionStatus;
+  descriptionStatus?: SectionStatus;
+  tagsStatus?: SectionStatus;
+  thumbnailsError?: string | null;
+  descriptionError?: string | null;
+  tagsError?: string | null;
+  // Retry handlers
+  onRetryThumbnails?: () => void;
+  onRetryDescription?: () => void;
+  onRetryTags?: () => void;
 }
 
 export const VideoPreviewPanel = ({
@@ -41,6 +55,15 @@ export const VideoPreviewPanel = ({
   hasVideoUploaded = false,
   hasImagesUploaded = false,
   assetIds = [],
+  thumbnailsStatus = "idle",
+  descriptionStatus = "idle",
+  tagsStatus = "idle",
+  thumbnailsError = null,
+  descriptionError = null,
+  tagsError = null,
+  onRetryThumbnails,
+  onRetryDescription,
+  onRetryTags,
 }: VideoPreviewPanelProps) => {
   const [generateAlert, setGenerateAlert] = useState<InlineAlertType | null>(null);
 
@@ -63,8 +86,20 @@ export const VideoPreviewPanel = ({
       setGenerateAlert(null);
     }
   };
+
+  const handleReportIssue = (section: string) => {
+    // TODO: Implement issue reporting (e.g., open modal, send to analytics)
+    console.log(`Reporting issue for section: ${section}`);
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'report_generation_issue', {
+        section,
+      });
+    }
+  };
+
   // Check if nothing has been generated yet
-  const hasNoContent = variants.length === 0 && !description && tags.length === 0;
+  const hasNoContent = variants.length === 0 && !description && tags.length === 0 &&
+    thumbnailsStatus === "idle" && descriptionStatus === "idle" && tagsStatus === "idle";
 
   return (
     <Card className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-[0_20px_60px_-45px_rgba(15,23,42,0.4)] h-full flex flex-col">
@@ -121,39 +156,49 @@ export const VideoPreviewPanel = ({
             Description
           </h3>
           <div>
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
-              {description ? (
-                <>
-                  <div className="prose prose-sm max-w-none flex-1">
-                    <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{description}</p>
-                  </div>
-                  <div className="mt-3 flex gap-2 shrink-0">
-                    <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
-                      Copy
-                    </button>
-                    <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
-                      Edit
-                    </button>
-                  </div>
-                </>
-              ) : (
+            {/* Loading State */}
+            {descriptionStatus === "loading" && <DescriptionSkeleton />}
+
+            {/* Error State */}
+            {descriptionStatus === "error" && descriptionError && onRetryDescription && (
+              <SectionError
+                message={descriptionError}
+                onRetry={onRetryDescription}
+                onReportIssue={() => handleReportIssue("description")}
+                isRetrying={descriptionStatus === "loading"}
+              />
+            )}
+
+            {/* Success State */}
+            {descriptionStatus === "success" && description && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
+                <div className="prose prose-sm max-w-none flex-1">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{description}</p>
+                </div>
+                <div className="mt-3 flex gap-2 shrink-0">
+                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                    Copy
+                  </button>
+                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                    Edit
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Idle/Empty State */}
+            {descriptionStatus === "idle" && !description && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
                 <div className="flex-1 flex items-center justify-center text-center">
                   <div className="text-slate-500">
-                    {isGeneratingAll ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
-                        Generating description...
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-slate-600">Your optimized description will appear here</p>
-                        <p className="text-xs text-slate-500">Complete the requirements and click Generate</p>
-                      </div>
-                    )}
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-slate-600">Your optimized description will appear here</p>
+                      <p className="text-xs text-slate-500">Complete the requirements and click Generate</p>
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -164,46 +209,56 @@ export const VideoPreviewPanel = ({
             Tags
           </h3>
           <div>
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
-              {tags.length > 0 ? (
-                <>
-                  <div className="flex-1 flex flex-wrap gap-2 content-start">
-                    {tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-slate-200 text-slate-700 text-sm rounded-full"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-3 flex gap-2 shrink-0">
-                    <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
-                      Copy All
-                    </button>
-                    <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
-                      Edit
-                    </button>
-                  </div>
-                </>
-              ) : (
+            {/* Loading State */}
+            {tagsStatus === "loading" && <TagsSkeleton />}
+
+            {/* Error State */}
+            {tagsStatus === "error" && tagsError && onRetryTags && (
+              <SectionError
+                message={tagsError}
+                onRetry={onRetryTags}
+                onReportIssue={() => handleReportIssue("tags")}
+                isRetrying={tagsStatus === "loading"}
+              />
+            )}
+
+            {/* Success State */}
+            {tagsStatus === "success" && tags.length > 0 && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
+                <div className="flex-1 flex flex-wrap gap-2 content-start">
+                  {tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-slate-200 text-slate-700 text-sm rounded-full"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-3 flex gap-2 shrink-0">
+                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                    Copy All
+                  </button>
+                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                    Edit
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Idle/Empty State */}
+            {tagsStatus === "idle" && tags.length === 0 && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
                 <div className="flex-1 flex items-center justify-center text-center">
                   <div className="text-slate-500">
-                    {isGeneratingAll ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
-                        Generating tags...
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-slate-600">Your optimized tags will appear here</p>
-                        <p className="text-xs text-slate-500">Complete the requirements and click Generate</p>
-                      </div>
-                    )}
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-slate-600">Your optimized tags will appear here</p>
+                      <p className="text-xs text-slate-500">Complete the requirements and click Generate</p>
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
