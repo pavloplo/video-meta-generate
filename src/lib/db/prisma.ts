@@ -4,8 +4,14 @@ import { env } from "@/lib/env.server";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
+// Use validated env to ensure DATABASE_URL is available
+// This will throw a clear error if DATABASE_URL is missing
+const databaseUrl = env.DATABASE_URL;
+
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient();
+  new PrismaClient({
+    // log: ["error", "warn"], // enable if useful
+  });
 
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

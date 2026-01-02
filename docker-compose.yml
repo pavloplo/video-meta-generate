@@ -1,6 +1,28 @@
 version: "3.9"
 
 services:
+  # Local development database (only used when running locally)
+  # Staging/prod use external databases via DATABASE_URL env var
+  postgres:
+    image: postgres:16-alpine
+    container_name: app_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - local
+
   app:
     image: ${IMAGE:-ghcr.io/video-meta-generate:dev}
     build:
@@ -16,9 +38,14 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       DIRECT_URL: ${DIRECT_URL}
       NODE_ENV: "production"
+    # Note: depends_on removed - staging/prod use external databases
+    # For local dev with postgres, start it separately: docker compose --profile local up postgres
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+volumes:
+  postgres_data:
