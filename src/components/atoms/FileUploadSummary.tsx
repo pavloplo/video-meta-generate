@@ -61,9 +61,9 @@ export const FileUploadSummary = ({
                             unoptimized
                         />
                     ) : (
-                        <div className="text-slate-400">
+                        <div className="text-slate-400" aria-hidden="true">
                             {isVideo ? (
-                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -78,7 +78,7 @@ export const FileUploadSummary = ({
                                     />
                                 </svg>
                             ) : (
-                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -114,6 +114,7 @@ export const FileUploadSummary = ({
                         <button
                             onClick={onReplace}
                             className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:border-blue-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                            aria-label={`Replace ${file.name}`}
                         >
                             {UPLOAD_LABELS.REPLACE_FILE}
                         </button>
@@ -121,6 +122,7 @@ export const FileUploadSummary = ({
                             <button
                                 onClick={onRemove}
                                 className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:border-red-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                                aria-label={`Remove ${file.name}`}
                             >
                                 {UPLOAD_LABELS.REMOVE_FILE}
                             </button>

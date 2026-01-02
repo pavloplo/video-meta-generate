@@ -14,7 +14,11 @@ export const SectionError = ({
   isRetrying = false,
 }: SectionErrorProps) => {
   return (
-    <div className="bg-red-50 border border-red-200 rounded-lg p-4 min-h-[120px] flex flex-col items-center justify-center">
+    <div 
+      role="alert" 
+      aria-live="assertive"
+      className="bg-red-50 border border-red-200 rounded-lg p-4 min-h-[120px] flex flex-col items-center justify-center"
+    >
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-2 text-red-700">
           <svg
@@ -22,6 +26,7 @@ export const SectionError = ({
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -39,6 +44,7 @@ export const SectionError = ({
             size="sm"
             variant="outline"
             className="bg-white hover:bg-red-50 border-red-300 text-red-700"
+            aria-label={isRetrying ? "Retrying generation" : "Retry generation"}
           >
             {isRetrying ? "Retrying..." : "Retry"}
           </Button>
@@ -48,6 +54,7 @@ export const SectionError = ({
             size="sm"
             variant="ghost"
             className="text-red-600 hover:text-red-700 hover:bg-red-100"
+            aria-label="Report this issue"
           >
             Report Issue
           </Button>

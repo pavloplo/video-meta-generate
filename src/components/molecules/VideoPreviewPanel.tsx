@@ -102,21 +102,21 @@ export const VideoPreviewPanel = ({
     thumbnailsStatus === "idle" && descriptionStatus === "idle" && tagsStatus === "idle";
 
   return (
-    <Card className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-[0_20px_60px_-45px_rgba(15,23,42,0.4)] h-full flex flex-col">
+    <Card className="rounded-3xl border border-slate-200/80 bg-white/80 shadow-[0_20px_60px_-45px_rgba(15,23,42,0.4)] h-full flex flex-col">
       <CardHeader>
         <CardTitle id="preview-heading">Generated Metadata</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto">
+      <CardContent className="flex-1 overflow-y-auto space-y-6">
         {/* Empty state guidance when nothing has been generated */}
         {hasNoContent && !isGeneratingAll && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-2.5">
+              <svg className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div className="flex-1">
                 <h4 className="text-sm font-semibold text-blue-900 mb-1">What happens next?</h4>
-                <p className="text-sm text-blue-800 leading-relaxed">
+                <p className="text-xs text-blue-800 leading-relaxed">
                   {GENERATION_HELPER.WHAT_HAPPENS_NEXT}
                 </p>
               </div>
@@ -125,8 +125,8 @@ export const VideoPreviewPanel = ({
         )}
 
         {/* Thumbnails Section */}
-        <div className="space-y-4 mb-6">
-          <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-2">
+        <div className="space-y-3">
+          <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
             <span className="text-blue-600">📸</span>
             Thumbnails
           </h3>
@@ -150,8 +150,8 @@ export const VideoPreviewPanel = ({
         </div>
 
         {/* Description Section */}
-        <div className="space-y-4 mb-6">
-          <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-2">
+        <div className="space-y-3">
+          <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
             <span className="text-green-600">📝</span>
             Description
           </h3>
@@ -165,21 +165,27 @@ export const VideoPreviewPanel = ({
                 message={descriptionError}
                 onRetry={onRetryDescription}
                 onReportIssue={() => handleReportIssue("description")}
-                isRetrying={descriptionStatus === "loading"}
+                isRetrying={false}
               />
             )}
 
             {/* Success State */}
             {descriptionStatus === "success" && description && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[100px] flex flex-col">
                 <div className="prose prose-sm max-w-none flex-1">
-                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{description}</p>
+                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{description}</p>
                 </div>
-                <div className="mt-3 flex gap-2 shrink-0">
-                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                <div className="mt-2.5 flex gap-1.5 shrink-0">
+                  <button
+                    className="text-xs px-2.5 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    aria-label="Copy description to clipboard"
+                  >
                     Copy
                   </button>
-                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                  <button
+                    className="text-xs px-2.5 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    aria-label="Edit description"
+                  >
                     Edit
                   </button>
                 </div>
@@ -188,12 +194,12 @@ export const VideoPreviewPanel = ({
 
             {/* Idle/Empty State */}
             {descriptionStatus === "idle" && !description && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[100px] flex flex-col">
                 <div className="flex-1 flex items-center justify-center text-center">
-                  <div className="text-slate-500">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-slate-600">Your optimized description will appear here</p>
-                      <p className="text-xs text-slate-500">Complete the requirements and click Generate</p>
+                  <div className="text-slate-600">
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium text-slate-700">Your optimized description will appear here</p>
+                      <p className="text-xs text-slate-600">Complete the requirements and click Generate</p>
                     </div>
                   </div>
                 </div>
@@ -203,8 +209,8 @@ export const VideoPreviewPanel = ({
         </div>
 
         {/* Tags Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-2">
+        <div className="space-y-3">
+          <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-1.5">
             <span className="text-purple-600">🏷️</span>
             Tags
           </h3>
@@ -218,28 +224,35 @@ export const VideoPreviewPanel = ({
                 message={tagsError}
                 onRetry={onRetryTags}
                 onReportIssue={() => handleReportIssue("tags")}
-                isRetrying={tagsStatus === "loading"}
+                isRetrying={false}
               />
             )}
 
             {/* Success State */}
             {tagsStatus === "success" && tags.length > 0 && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
-                <div className="flex-1 flex flex-wrap gap-2 content-start">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[100px] flex flex-col">
+                <div className="flex-1 flex flex-wrap gap-1.5 content-start" role="list" aria-label="Generated tags">
                   {tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-slate-200 text-slate-700 text-sm rounded-full"
+                      role="listitem"
+                      className="px-2.5 py-0.5 bg-slate-200 text-slate-700 text-xs rounded-full"
                     >
                       #{tag}
                     </span>
                   ))}
                 </div>
-                <div className="mt-3 flex gap-2 shrink-0">
-                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                <div className="mt-2.5 flex gap-1.5 shrink-0">
+                  <button
+                    className="text-xs px-2.5 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    aria-label="Copy all tags to clipboard"
+                  >
                     Copy All
                   </button>
-                  <button className="text-xs px-3 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors">
+                  <button
+                    className="text-xs px-2.5 py-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    aria-label="Edit tags"
+                  >
                     Edit
                   </button>
                 </div>
@@ -248,12 +261,12 @@ export const VideoPreviewPanel = ({
 
             {/* Idle/Empty State */}
             {tagsStatus === "idle" && tags.length === 0 && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 min-h-[120px] flex flex-col">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[100px] flex flex-col">
                 <div className="flex-1 flex items-center justify-center text-center">
-                  <div className="text-slate-500">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-slate-600">Your optimized tags will appear here</p>
-                      <p className="text-xs text-slate-500">Complete the requirements and click Generate</p>
+                  <div className="text-slate-600">
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium text-slate-700">Your optimized tags will appear here</p>
+                      <p className="text-xs text-slate-600">Complete the requirements and click Generate</p>
                     </div>
                   </div>
                 </div>
@@ -263,7 +276,7 @@ export const VideoPreviewPanel = ({
         </div>
 
         {/* Fixed alert slot for generate actions */}
-        <div className="h-10 flex items-start mt-6">
+        <div className="h-8 flex items-start">
           {generateAlert ? (
             <InlineAlertComponent
               scope={generateAlert.scope}
@@ -272,7 +285,7 @@ export const VideoPreviewPanel = ({
               isVisible={generateAlert.isVisible}
             />
           ) : (
-            <div className="h-10" aria-hidden="true" />
+            <div className="h-8" aria-hidden="true" />
           )}
         </div>
       </CardContent>

@@ -19,6 +19,7 @@ export const VideoMetadataForm = () => {
   const [description, setDescription] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
+  const [statusAnnouncement, setStatusAnnouncement] = useState<string>('');
   const [generationOptions, setGenerationOptions] = useState<GenerationOptions>({
     thumbnails: true,
     description: true,
@@ -192,6 +193,19 @@ If you found this helpful, please give it a thumbs up and consider subscribing f
     // Wait for all generations to complete (don't fail if one fails)
     await Promise.allSettled(promises);
 
+    // Announce completion to screen readers
+    const successCount = [
+      generationOptions.thumbnails && thumbnailsStatus === 'success',
+      generationOptions.description && descriptionStatus === 'success',
+      generationOptions.tags && tagsStatus === 'success',
+    ].filter(Boolean).length;
+
+    if (successCount > 0) {
+      setStatusAnnouncement(`Generation complete. ${successCount} section${successCount > 1 ? 's' : ''} successfully generated.`);
+      // Clear announcement after screen readers have time to read it
+      setTimeout(() => setStatusAnnouncement(''), 3000);
+    }
+
     setIsGeneratingAll(false);
   };
 
@@ -212,8 +226,18 @@ If you found this helpful, please give it a thumbs up and consider subscribing f
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2 min-h-[600px]">
-      <div className="min-h-[600px]">
+    <div className="grid gap-6 lg:grid-cols-2">
+      {/* ARIA Live Region for Status Announcements */}
+      <div 
+        role="status" 
+        aria-live="polite" 
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {statusAnnouncement}
+      </div>
+      
+      <div>
         <VideoInputPanel
           onSourceTypeChange={handleSourceTypeChange}
           onHookTextChange={handleHookTextChange}
@@ -235,7 +259,7 @@ If you found this helpful, please give it a thumbs up and consider subscribing f
         />
       </div>
 
-      <div className="min-h-[600px]">
+      <div>
         <VideoPreviewPanel
           sourceType={sourceType}
           hookText={hookText}

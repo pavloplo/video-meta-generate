@@ -71,16 +71,20 @@ export const HookTextControls = ({
                     <div className="flex justify-between items-center">
                         <p className={`text-xs transition-colors ${
                             localHookText.length > VALIDATION_RULES.HOOK_TEXT_RECOMMENDED_LENGTH
-                                ? "text-amber-600"
-                                : "text-slate-500"
+                                ? "text-amber-700"
+                                : "text-slate-600"
                         }`}>
                             Recommended: under {VALIDATION_RULES.HOOK_TEXT_RECOMMENDED_LENGTH} characters
                         </p>
-                        <p className={`text-xs tabular-nums transition-colors ${
-                            localHookText.length > VALIDATION_RULES.HOOK_TEXT_RECOMMENDED_LENGTH
-                                ? "text-amber-600 font-medium"
-                                : "text-slate-500"
-                        }`}>
+                        <p 
+                            className={`text-xs tabular-nums transition-colors ${
+                                localHookText.length > VALIDATION_RULES.HOOK_TEXT_RECOMMENDED_LENGTH
+                                    ? "text-amber-700 font-medium"
+                                    : "text-slate-600"
+                            }`}
+                            aria-live="polite"
+                            aria-label={`${localHookText.length} of ${VALIDATION_RULES.HOOK_TEXT_MAX_LENGTH} characters used`}
+                        >
                             {localHookText.length}/{VALIDATION_RULES.HOOK_TEXT_MAX_LENGTH}
                         </p>
                     </div>

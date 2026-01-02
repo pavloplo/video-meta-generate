@@ -60,6 +60,7 @@ export const MobileMetadataForm = () => {
         tagsError: null,
     });
     const [isGenerating, setIsGenerating] = useState(false);
+    const [statusAnnouncement, setStatusAnnouncement] = useState<string>('');
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -249,6 +250,19 @@ Welcome to the most comprehensive guide on this topic. Whether you're just getti
             // Wait for all generations to complete (don't fail if one fails)
             await Promise.allSettled(promises);
 
+            // Announce completion to screen readers
+            const successCount = [
+                sessionState.generationOptions.thumbnails && sessionState.thumbnailsStatus === 'success',
+                sessionState.generationOptions.description && sessionState.descriptionStatus === 'success',
+                sessionState.generationOptions.tags && sessionState.tagsStatus === 'success',
+            ].filter(Boolean).length;
+
+            if (successCount > 0) {
+                setStatusAnnouncement(`Generation complete. ${successCount} section${successCount > 1 ? 's' : ''} successfully generated.`);
+                // Clear announcement after screen readers have time to read it
+                setTimeout(() => setStatusAnnouncement(''), 3000);
+            }
+
             if (typeof window !== 'undefined' && (window as any).gtag) {
                 (window as any).gtag('event', 'mobile_generation_success', {
                     tone: sessionState.tone,
@@ -288,21 +302,53 @@ Welcome to the most comprehensive guide on this topic. Whether you're just getti
 
     return (
         <div className="flex flex-col h-full max-h-screen">
-            <div className="flex border-b border-slate-200 bg-white sticky top-0 z-10">
+            {/* ARIA Live Region for Status Announcements */}
+            <div 
+                role="status" 
+                aria-live="polite" 
+                aria-atomic="true"
+                className="sr-only"
+            >
+                {statusAnnouncement}
+            </div>
+            
+            <div className="flex border-b border-slate-200 bg-white sticky top-0 z-10" role="tablist" aria-label="Metadata generation sections">
                 <button
+                    role="tab"
+                    aria-selected={activeTab === 'inputs'}
+                    aria-controls="inputs-panel"
+                    id="inputs-tab"
                     onClick={() => setActiveTab('inputs')}
-                    className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${activeTab === 'inputs'
+                    onKeyDown={(e) => {
+                        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setActiveTab('results');
+                            document.getElementById('results-tab')?.focus();
+                        }
+                    }}
+                    className={`flex-1 py-4 px-6 text-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset focus-visible:z-10 ${activeTab === 'inputs'
                         ? 'text-blue-600 border-b-2 border-blue-600'
-                        : 'text-slate-600 hover:text-slate-900'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
                         }`}
                 >
                     {MOBILE_TABS.INPUTS}
                 </button>
                 <button
+                    role="tab"
+                    aria-selected={activeTab === 'results'}
+                    aria-controls="results-panel"
+                    id="results-tab"
                     onClick={() => setActiveTab('results')}
-                    className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${activeTab === 'results'
+                    onKeyDown={(e) => {
+                        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            setActiveTab('inputs');
+                            document.getElementById('inputs-tab')?.focus();
+                        }
+                    }}
+                    className={`flex-1 py-4 px-6 text-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset focus-visible:z-10 ${activeTab === 'results'
                         ? 'text-blue-600 border-b-2 border-blue-600'
-                        : 'text-slate-600 hover:text-slate-900'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
                         }`}
                 >
                     {MOBILE_TABS.RESULTS}
@@ -311,7 +357,12 @@ Welcome to the most comprehensive guide on this topic. Whether you're just getti
 
             <div className="flex-1 overflow-hidden">
                 {activeTab === 'inputs' && (
-                    <div className="h-full overflow-y-auto pb-24">
+                    <div 
+                        id="inputs-panel"
+                        role="tabpanel"
+                        aria-labelledby="inputs-tab"
+                        className="h-full overflow-y-auto pb-24"
+                    >
                         <VideoInputPanel
                             onSourceTypeChange={handleSourceTypeChange}
                             onHookTextChange={handleHookTextChange}
@@ -341,7 +392,12 @@ Welcome to the most comprehensive guide on this topic. Whether you're just getti
                 )}
 
                 {activeTab === 'results' && (
-                    <div className="h-full overflow-hidden">
+                    <div 
+                        id="results-panel"
+                        role="tabpanel"
+                        aria-labelledby="results-tab"
+                        className="h-full overflow-hidden"
+                    >
                         <VideoPreviewPanel
                             sourceType={sessionState.sourceType}
                             hookText={sessionState.hookText}

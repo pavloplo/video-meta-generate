@@ -78,7 +78,7 @@ export const ToneSelector = ({
                 )}>
                   {option.label}
                 </div>
-                <div className="text-xs text-slate-500 mt-1 leading-tight">
+                <div className="text-xs text-slate-600 mt-1 leading-tight">
                   {option.description}
                 </div>
               </label>
@@ -87,7 +87,7 @@ export const ToneSelector = ({
         </div>
       </fieldset>
       {showHelperText && (
-        <p className="text-xs text-slate-500 mt-3">
+        <p className="text-xs text-slate-600 mt-3">
           Used for text style, not content meaning
         </p>
       )}

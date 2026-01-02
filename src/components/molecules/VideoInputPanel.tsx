@@ -182,51 +182,53 @@ export const VideoInputPanel = ({
   };
 
   return (
-    <Card className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-[0_20px_60px_-45px_rgba(15,23,42,0.4)] h-full flex flex-col">
+    <Card className="rounded-3xl border border-slate-200/80 bg-white/80 shadow-[0_20px_60px_-45px_rgba(15,23,42,0.4)] h-full flex flex-col">
       <CardHeader>
         <CardTitle id="inputs-heading">Generate Metadata</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 space-y-4 pb-0">
+      <CardContent className="flex-1 space-y-6 pb-0">
         {/* Step 1: Upload file */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-sm font-medium">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
               1
             </div>
-            <h3 className="text-sm font-medium text-slate-900">Upload file</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Upload file</h3>
           </div>
-          <div className="pl-9">
+          <div className="pl-7">
             {!uploadedFile && !isUploading && (
               <>
-                <label className="block">
+                <label htmlFor="file-upload" className="block">
+                  <span className="sr-only">Upload video or image file for metadata generation</span>
                   <div
-                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 hover:border-slate-400 transition-colors cursor-pointer"
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 hover:border-slate-400 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <svg className="w-10 h-10 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-10 h-10 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </svg>
-                      <p className="mb-2 text-sm text-slate-600">
+                      <p className="mb-2 text-sm text-slate-700">
                         <span className="font-semibold">Click to upload</span> or drag and drop
                       </p>
-                      <p className="text-xs text-slate-500 text-center px-4 mb-3">
+                      <p className="text-xs text-slate-600 text-center px-4 mb-3">
                         Video files (MP4, MOV, AVI, WebM) or images (JPG, PNG, GIF, WebP)
                       </p>
                       <div className="mt-2 px-4 text-center space-y-1">
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-600">
                           <span className="font-medium">Video:</span> Max {UPLOAD_CONSTRAINTS.VIDEO_MAX_SIZE_MB}MB, up to {Math.floor(UPLOAD_CONSTRAINTS.VIDEO_MAX_DURATION_SECONDS / 60)} minutes
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-600">
                           <span className="font-medium">Image:</span> Max {UPLOAD_CONSTRAINTS.IMAGE_MAX_SIZE_MB}MB per file
                         </p>
                       </div>
                     </div>
                     <input
+                      id="file-upload"
                       ref={fileInputRef}
                       type="file"
-                      className="hidden"
+                      className="sr-only"
                       accept={[...SUPPORTED_VIDEO_FORMATS, ...SUPPORTED_IMAGE_FORMATS].join(',')}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -234,9 +236,13 @@ export const VideoInputPanel = ({
                           handleFileChange(file);
                         }
                       }}
+                      aria-describedby="file-upload-constraints"
                     />
                   </div>
                 </label>
+                <div id="file-upload-constraints" className="sr-only">
+                  Accepted formats: Video (MP4, MOV, AVI, WebM) up to {UPLOAD_CONSTRAINTS.VIDEO_MAX_SIZE_MB}MB and {Math.floor(UPLOAD_CONSTRAINTS.VIDEO_MAX_DURATION_SECONDS / 60)} minutes, or images (JPG, PNG, GIF, WebP) up to {UPLOAD_CONSTRAINTS.IMAGE_MAX_SIZE_MB}MB per file.
+                </div>
               </>
             )}
 
@@ -273,14 +279,14 @@ export const VideoInputPanel = ({
         </div>
 
         {/* Step 2: Write hook text */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-sm font-medium">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
               2
             </div>
-            <h3 className="text-sm font-medium text-slate-900">Write hook text or leave empty for optimized suggestion</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Write hook text <span className="font-normal text-slate-500">(optional)</span></h3>
           </div>
-          <div className="pl-9">
+          <div className="pl-7">
             <HookTextControls
               hookText={hookText}
               onHookTextChange={handleHookTextChange}
@@ -289,14 +295,14 @@ export const VideoInputPanel = ({
         </div>
 
         {/* Step 3: Choose tone */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-sm font-medium">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
               3
             </div>
-            <h3 className="text-sm font-medium text-slate-900">Choose tone</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Choose tone</h3>
           </div>
-          <div className="pl-9">
+          <div className="pl-7">
             <ToneSelector
               value={tone}
               onChange={handleToneChange}
@@ -306,16 +312,16 @@ export const VideoInputPanel = ({
 
         {/* Step 4: Select what to generate */}
         {onGenerationOptionsChange && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-sm font-medium">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
                 4
               </div>
-              <h3 className="text-sm font-medium text-slate-900">Select what to generate</h3>
+              <h3 className="text-sm font-semibold text-slate-900">Select what to generate</h3>
             </div>
-            <div className="pl-9">
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 cursor-pointer group">
+            <div className="pl-7">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2.5 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={generationOptions.thumbnails}
@@ -323,13 +329,13 @@ export const VideoInputPanel = ({
                       ...generationOptions,
                       thumbnails: e.target.checked,
                     })}
-                    className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   />
-                  <span className="text-sm font-medium text-slate-900 group-hover:text-slate-700">
+                  <span className="text-sm text-slate-700 group-hover:text-slate-900">
                     Thumbnails
                   </span>
                 </label>
-                <label className="flex items-center gap-3 cursor-pointer group">
+                <label className="flex items-center gap-2.5 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={generationOptions.description}
@@ -337,13 +343,13 @@ export const VideoInputPanel = ({
                       ...generationOptions,
                       description: e.target.checked,
                     })}
-                    className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   />
-                  <span className="text-sm font-medium text-slate-900 group-hover:text-slate-700">
+                  <span className="text-sm text-slate-700 group-hover:text-slate-900">
                     Description
                   </span>
                 </label>
-                <label className="flex items-center gap-3 cursor-pointer group">
+                <label className="flex items-center gap-2.5 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={generationOptions.tags}
@@ -351,9 +357,9 @@ export const VideoInputPanel = ({
                       ...generationOptions,
                       tags: e.target.checked,
                     })}
-                    className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   />
-                  <span className="text-sm font-medium text-slate-900 group-hover:text-slate-700">
+                  <span className="text-sm text-slate-700 group-hover:text-slate-900">
                     Tags
                   </span>
                 </label>
@@ -364,77 +370,80 @@ export const VideoInputPanel = ({
 
         {/* Checklist and Generate Button */}
         {onGenerate && (
-          <div className="pt-6 border-t border-slate-200 space-y-4">
+          <div className="pt-4 border-t border-slate-200 space-y-3">
             {/* Requirements Checklist */}
-            <div className="space-y-2.5">
-              <h4 className="text-xs font-medium text-slate-600 uppercase tracking-wider">Requirements</h4>
-              <div className="space-y-2">
+            <div className="space-y-2">
+              <h4 className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Requirements</h4>
+              <div className="space-y-1.5" role="list" aria-label="Generation requirements">
                 {/* File uploaded - Required */}
-                <div className="flex items-center gap-2">
-                  <div className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-colors ${
-                    hasVideoUploaded || hasImagesUploaded 
-                      ? 'bg-green-500 border-green-500' 
+                <div className="flex items-center gap-2" role="listitem">
+                  <div
+                    className={`flex items-center justify-center w-4 h-4 rounded border-2 transition-colors ${hasVideoUploaded || hasImagesUploaded
+                      ? 'bg-green-500 border-green-500'
                       : 'border-slate-300 bg-white'
-                  }`}>
+                      }`}
+                    aria-hidden="true"
+                  >
                     {(hasVideoUploaded || hasImagesUploaded) && (
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
-                  <span className={`text-sm ${
-                    hasVideoUploaded || hasImagesUploaded 
-                      ? 'text-slate-700 font-medium' 
-                      : 'text-slate-500'
-                  }`}>
+                  <span className={`text-xs ${hasVideoUploaded || hasImagesUploaded
+                    ? 'text-slate-700'
+                    : 'text-slate-600'
+                    }`}>
                     {CHECKLIST_LABELS.FILE_UPLOADED}
-                    <span className="ml-1.5 text-xs font-semibold text-red-600">*</span>
+                    <span className="ml-1 text-xs font-semibold text-red-600" aria-label="required">*</span>
                   </span>
                 </div>
 
                 {/* Hook text - Optional */}
-                <div className="flex items-center gap-2">
-                  <div className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-colors ${
-                    hookText.trim() 
-                      ? 'bg-green-500 border-green-500' 
+                <div className="flex items-center gap-2" role="listitem">
+                  <div
+                    className={`flex items-center justify-center w-4 h-4 rounded border-2 transition-colors ${hookText.trim()
+                      ? 'bg-green-500 border-green-500'
                       : 'border-slate-300 bg-white'
-                  }`}>
+                      }`}
+                    aria-hidden="true"
+                  >
                     {hookText.trim() && (
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
-                  <span className={`text-sm ${
-                    hookText.trim() 
-                      ? 'text-slate-700 font-medium' 
-                      : 'text-slate-500'
-                  }`}>
+                  <span className={`text-xs ${hookText.trim()
+                    ? 'text-slate-700'
+                    : 'text-slate-600'
+                    }`}>
                     {CHECKLIST_LABELS.HOOK_TEXT}
-                    <span className="ml-1.5 text-xs text-slate-400">(optional)</span>
+                    <span className="ml-1 text-xs text-slate-600">(optional)</span>
                   </span>
                 </div>
 
                 {/* Tone selected - Optional */}
-                <div className="flex items-center gap-2">
-                  <div className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-colors ${
-                    tone 
-                      ? 'bg-green-500 border-green-500' 
+                <div className="flex items-center gap-2" role="listitem">
+                  <div
+                    className={`flex items-center justify-center w-4 h-4 rounded border-2 transition-colors ${tone
+                      ? 'bg-green-500 border-green-500'
                       : 'border-slate-300 bg-white'
-                  }`}>
+                      }`}
+                    aria-hidden="true"
+                  >
                     {tone && (
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
-                  <span className={`text-sm ${
-                    tone 
-                      ? 'text-slate-700 font-medium' 
-                      : 'text-slate-500'
-                  }`}>
+                  <span className={`text-xs ${tone
+                    ? 'text-slate-700'
+                    : 'text-slate-600'
+                    }`}>
                     {CHECKLIST_LABELS.TONE_SELECTED}
-                    <span className="ml-1.5 text-xs text-slate-400">(optional)</span>
+                    <span className="ml-1 text-xs text-slate-600">(optional)</span>
                   </span>
                 </div>
               </div>
@@ -446,14 +455,15 @@ export const VideoInputPanel = ({
                 onClick={onGenerate}
                 disabled={!canGenerate || isGenerating}
                 size="lg"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all disabled:bg-slate-300 disabled:text-slate-600 disabled:cursor-not-allowed"
+                aria-describedby={!canGenerate && !isGenerating ? "generate-button-help" : undefined}
               >
                 {isGenerating ? BUTTON_LABELS.GENERATING_METADATA : BUTTON_LABELS.GENERATE_METADATA}
               </Button>
               {/* Helper text when disabled */}
               {!canGenerate && !isGenerating && (
-                <div className="mt-2 text-xs text-slate-500 text-center flex items-center justify-center gap-1.5">
-                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div id="generate-button-help" className="mt-1.5 text-xs text-slate-600 text-center flex items-center justify-center gap-1">
+                  <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {GENERATION_HELPER.UPLOAD_FILE_TO_CONTINUE}

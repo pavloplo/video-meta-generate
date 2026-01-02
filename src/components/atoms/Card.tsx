@@ -19,7 +19,7 @@ export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 export const CardHeader = ({ className, ...props }: CardHeaderProps) => {
   return (
     <div
-      className={cn("flex flex-col space-y-1.5 p-6", className)}
+      className={cn("flex flex-col space-y-1 p-4 pb-3", className)}
       {...props}
     />
   );
@@ -31,7 +31,7 @@ export const CardTitle = ({ className, ...props }: CardTitleProps) => {
   return (
     <h3
       className={cn(
-        "text-2xl font-semibold leading-none tracking-tight",
+        "text-lg font-semibold leading-none tracking-tight text-slate-900",
         className
       )}
       {...props}
@@ -43,6 +43,6 @@ export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const CardContent = ({ className, ...props }: CardContentProps) => {
   return (
-    <div className={cn("p-6 pt-0", className)} {...props} />
+    <div className={cn("p-4 pt-0", className)} {...props} />
   );
 };
