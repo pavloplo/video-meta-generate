@@ -312,7 +312,7 @@ Welcome to the most comprehensive guide on this topic. Whether you're just getti
                 {statusAnnouncement}
             </div>
             
-            <div className="flex border-b border-slate-200 bg-white sticky top-0 z-10" role="tablist" aria-label="Metadata generation sections">
+            <div className="flex border-b border-slate-200 bg-white sticky top-0 z-20 shadow-sm" role="tablist" aria-label="Metadata generation sections">
                 <button
                     role="tab"
                     aria-selected={activeTab === 'inputs'}
@@ -373,7 +373,7 @@ Welcome to the most comprehensive guide on this topic. Whether you're just getti
                             generationOptions={sessionState.generationOptions}
                             onGenerationOptionsChange={handleGenerationOptionsChange}
                         />
-                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 safe-area-inset-bottom">
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 z-30 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.1)]" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
                             <Button
                                 onClick={handleGenerate}
                                 disabled={!canGenerate() || isGenerating}
@@ -422,8 +422,9 @@ Welcome to the most comprehensive guide on this topic. Whether you're just getti
                             onRetryThumbnails={generateThumbnailsSection}
                             onRetryDescription={generateDescription}
                             onRetryTags={generateTags}
+                            useAccordions={true}
                         />
-                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 safe-area-inset-bottom">
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 z-30 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.1)]" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
                             <Button
                                 onClick={() => setActiveTab('inputs')}
                                 variant="outline"

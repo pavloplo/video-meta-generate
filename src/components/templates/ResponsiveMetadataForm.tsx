@@ -9,7 +9,7 @@ export const ResponsiveMetadataForm = () => {
 
     useEffect(() => {
         const checkIsMobile = () => {
-            setIsMobile(window.innerWidth <= 768);
+            setIsMobile(window.innerWidth < 1024);
         };
 
         // Check on mount
@@ -20,6 +20,6 @@ export const ResponsiveMetadataForm = () => {
         return () => window.removeEventListener('resize', checkIsMobile);
     }, []);
 
-    // Use mobile layout for screens ≤ 768px, desktop for larger
+    // Use mobile layout for screens < 1024px, desktop for larger
     return isMobile ? <MobileMetadataForm /> : <VideoMetadataForm />;
 };
