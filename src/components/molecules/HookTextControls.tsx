@@ -92,10 +92,18 @@ export const HookTextControls = ({
                         className="transition-all duration-300"
                     />
                     <div className="flex justify-between items-center">
-                        <p className="text-xs text-slate-500">
-                            Recommended: under 6 words
+                        <p className={`text-xs transition-colors ${
+                            localHookText.length > VALIDATION_RULES.HOOK_TEXT_RECOMMENDED_LENGTH
+                                ? "text-amber-600"
+                                : "text-slate-500"
+                        }`}>
+                            Recommended: under {VALIDATION_RULES.HOOK_TEXT_RECOMMENDED_LENGTH} characters
                         </p>
-                        <p className="text-xs text-slate-500 tabular-nums">
+                        <p className={`text-xs tabular-nums transition-colors ${
+                            localHookText.length > VALIDATION_RULES.HOOK_TEXT_RECOMMENDED_LENGTH
+                                ? "text-amber-600 font-medium"
+                                : "text-slate-500"
+                        }`}>
                             {localHookText.length}/{VALIDATION_RULES.HOOK_TEXT_MAX_LENGTH}
                         </p>
                     </div>
