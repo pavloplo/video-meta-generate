@@ -28,6 +28,8 @@ export interface ThumbnailVariantsPanelProps {
   selectedVariantId: string | null;
   onVariantsChange: (variants: ThumbnailVariant[]) => void;
   onSelectedVariantChange: (variantId: string | null) => void;
+  regenerationCount: number;
+  onRegenerationCountChange: (count: number | ((prev: number) => number)) => void;
   onInlineAlert: (alert: InlineAlertType | null) => void;
   hasVideoUploaded?: boolean;
   hasImagesUploaded?: boolean;
@@ -43,6 +45,8 @@ export const ThumbnailVariantsPanel = ({
   selectedVariantId,
   onVariantsChange,
   onSelectedVariantChange,
+  regenerationCount,
+  onRegenerationCountChange,
   onInlineAlert,
   hasVideoUploaded = false,
   hasImagesUploaded = false,
@@ -59,7 +63,7 @@ export const ThumbnailVariantsPanel = ({
     return true;
   })();
 
-  const canRegenerate = variants.length > 0 && variants.length < VALIDATION_RULES.THUMBNAIL_VARIANTS_MAX;
+  const canRegenerate = variants.length > 0 && regenerationCount < 6;
 
   const handleGenerate = async () => {
     if (!canGenerate) return;
@@ -111,7 +115,7 @@ export const ThumbnailVariantsPanel = ({
       onInlineAlert({
         scope: ALERT_SCOPES.REGENERATE,
         kind: ALERT_KINDS.WARNING,
-        message: "Limit reached—please choose a thumbnail",
+        message: "You've reached the limit. Choose a thumbnail to continue.",
       });
       return;
     }
@@ -141,6 +145,9 @@ export const ThumbnailVariantsPanel = ({
 
       const newVariants = [...variants, ...response.variants].slice(0, VALIDATION_RULES.THUMBNAIL_VARIANTS_MAX);
       onVariantsChange(newVariants);
+
+      // Increment regeneration count
+      onRegenerationCountChange(regenerationCount + 1);
 
       onInlineAlert({
         scope: ALERT_SCOPES.REGENERATE,
@@ -239,11 +246,11 @@ export const ThumbnailVariantsPanel = ({
             </div>
 
             {/* Limit Reached Message */}
-            {variants.length >= VALIDATION_RULES.THUMBNAIL_VARIANTS_MAX && (
+            {regenerationCount >= 6 && (
               <InlineAlert
                 scope={ALERT_SCOPES.REGENERATE}
                 kind={ALERT_KINDS.WARNING}
-                message="Maximum of 6 thumbnails reached. Choose one to continue."
+                message="You've reached the limit. Choose a thumbnail to continue."
               />
             )}
           </div>

@@ -14,6 +14,8 @@ export interface VideoPreviewPanelProps {
   selectedVariantId: string | null;
   onVariantsChange: (variants: ThumbnailVariant[]) => void;
   onSelectedVariantChange: (variantId: string | null) => void;
+  regenerationCount: number;
+  onRegenerationCountChange: (count: number | ((prev: number) => number)) => void;
   description: string;
   tags: string[];
   isGeneratingAll?: boolean;
@@ -30,6 +32,8 @@ export const VideoPreviewPanel = ({
   selectedVariantId,
   onVariantsChange,
   onSelectedVariantChange,
+  regenerationCount,
+  onRegenerationCountChange,
   description,
   tags,
   isGeneratingAll = false,
@@ -79,6 +83,8 @@ export const VideoPreviewPanel = ({
               selectedVariantId={selectedVariantId}
               onVariantsChange={onVariantsChange}
               onSelectedVariantChange={onSelectedVariantChange}
+              regenerationCount={regenerationCount}
+              onRegenerationCountChange={onRegenerationCountChange}
               onInlineAlert={handleInlineAlert}
               hasVideoUploaded={hasVideoUploaded}
               hasImagesUploaded={hasImagesUploaded}

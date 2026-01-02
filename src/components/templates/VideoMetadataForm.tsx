@@ -13,6 +13,7 @@ export const VideoMetadataForm = () => {
   const [tone, setTone] = useState<HookTone>(HOOK_TONES.VIRAL);
   const [variants, setVariants] = useState<ThumbnailVariant[]>([]);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [regenerationCount, setRegenerationCount] = useState(0);
   const [description, setDescription] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
 
@@ -121,6 +122,8 @@ If you found this helpful, please give it a thumbs up and consider subscribing f
           selectedVariantId={selectedVariantId}
           onVariantsChange={handleVariantsChange}
           onSelectedVariantChange={handleSelectedVariantChange}
+          regenerationCount={regenerationCount}
+          onRegenerationCountChange={setRegenerationCount}
           description={description}
           tags={tags}
           hasVideoUploaded={hasVideoUploaded}
