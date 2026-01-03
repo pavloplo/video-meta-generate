@@ -4,6 +4,7 @@ kind: Kustomization
 # Base configurations
 resources:
   - ../../base
+  - namespace.yaml
 
 # Override namespace for production
 namespace: production
