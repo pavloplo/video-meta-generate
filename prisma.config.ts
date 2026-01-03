@@ -1,13 +1,10 @@
-import dotenv from "dotenv";
-import { defineConfig } from "prisma/config";
-
-dotenv.config({ path: ".env" });
-dotenv.config({ path: ".env.local" });
+import "dotenv/config";
+import { defineConfig, env } from "prisma/config";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: process.env.DATABASE_URL || "postgresql://dummy:dummy@localhost:5432/dummy",
-    directUrl: process.env.DIRECT_URL,
+    url: env("DATABASE_URL"),
+    directUrl: env("DIRECT_URL"),
   },
 });
