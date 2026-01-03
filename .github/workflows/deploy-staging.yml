@@ -20,7 +20,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-      image_tag: ${{ steps.meta.outputs.tags }}
+      image: ${{ steps.build.outputs.image }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,10 +43,10 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=ref,event=branch
             type=sha,prefix=staging-
 
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -80,7 +80,7 @@ jobs:
           cd k8s/overlays/staging
 
           # Update image tag
-          kustomize edit set image ghcr.io/${{ github.repository }}=${{ needs.build-and-push.outputs.image_tag }}
+          kustomize edit set image ghcr.io/${{ github.repository }}=${{ needs.build-and-push.outputs.image }}
 
           # Create secrets
           kubectl create secret generic app-secrets \
