@@ -4,7 +4,7 @@ kind: Kustomization
 # Base configurations and staging-specific resources
 resources:
   - namespace.yaml
-  - ../../base
+  - ../../base/app
   - postgres
   - minio
   - patches/ingress.yaml
