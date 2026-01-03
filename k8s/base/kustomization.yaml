@@ -1,19 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Include base namespace
+# Include all component directories (namespace defined in overlays)
 resources:
-  - namespace.yaml
-
-# Include all component directories
   - app/
   - postgres/
   - minio/
 
 # Common labels for all resources
-commonLabels:
-  app.kubernetes.io/name: video-meta-app
-  app.kubernetes.io/component: application
+labels:
+  - pairs:
+      app.kubernetes.io/name: video-meta-app
+      app.kubernetes.io/component: application
 
 # Common annotations
 commonAnnotations:
