@@ -12,8 +12,14 @@ namespace: staging
 
 # Patches for staging environment
 patches:
-  - path: patches/hpa-scaling.yaml
-  - path: patches/app-resources.yaml
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: video-meta-app-hpa
+    path: patches/hpa-scaling.yaml
+  - target:
+      kind: Deployment
+      name: video-meta-app
+    path: patches/app-resources.yaml
 
 # Environment-specific labels
 labels:
