@@ -1,0 +1,56 @@
+# Google Cloud Platform Storage Classes
+# Requires GCE Persistent Disk CSI Driver to be installed in the cluster
+
+---
+# GCP PD SSD (Solid State Drive) - Default for most workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gcp-pd-ssd
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"  # Uncomment to make default
+provisioner: pd.csi.storage.gke.io
+parameters:
+  type: pd-ssd
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# GCP PD Balanced (Balanced Persistent Disk)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gcp-pd-balanced
+provisioner: pd.csi.storage.gke.io
+parameters:
+  type: pd-balanced
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# GCP PD Standard (Standard Persistent Disk - HDD)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gcp-pd-standard
+provisioner: pd.csi.storage.gke.io
+parameters:
+  type: pd-standard
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# GCP PD Extreme (Extreme Persistent Disk - High performance)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gcp-pd-extreme
+provisioner: pd.csi.storage.gke.io
+parameters:
+  type: pd-extreme
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true

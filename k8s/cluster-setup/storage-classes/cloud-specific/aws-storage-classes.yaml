@@ -1,0 +1,75 @@
+# AWS EBS Storage Classes
+# Requires AWS EBS CSI Driver to be installed in the cluster
+
+---
+# AWS EBS GP3 (General Purpose SSD) - Default for most workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: aws-ebs-gp3
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"  # Uncomment to make default
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  iopsPerGB: "50"
+  throughput: "125"
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# AWS EBS GP2 (Previous generation General Purpose SSD)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: aws-ebs-gp2
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp2
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# AWS EBS IO1 (Provisioned IOPS SSD) - For high-performance workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: aws-ebs-io1
+provisioner: ebs.csi.aws.com
+parameters:
+  type: io1
+  iopsPerGB: "50"
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# AWS EBS ST1 (Throughput Optimized HDD) - For large, sequential workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: aws-ebs-st1
+provisioner: ebs.csi.aws.com
+parameters:
+  type: st1
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# AWS EBS SC1 (Cold HDD) - For infrequently accessed data
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: aws-ebs-sc1
+provisioner: ebs.csi.aws.com
+parameters:
+  type: sc1
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true

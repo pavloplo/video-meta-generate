@@ -1,0 +1,39 @@
+# DigitalOcean Storage Classes
+# Requires DigitalOcean CSI Driver to be installed in the cluster
+
+---
+# DigitalOcean Block Storage (SSD) - Default for most workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: do-block-storage
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"  # Uncomment to make default
+provisioner: dobs.csi.digitalocean.com
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# DigitalOcean Block Storage with specific filesystem type
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: do-block-storage-xfs
+provisioner: dobs.csi.digitalocean.com
+parameters:
+  fstype: xfs
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# DigitalOcean Block Storage with retain policy
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: do-block-storage-retain
+provisioner: dobs.csi.digitalocean.com
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true

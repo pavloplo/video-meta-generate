@@ -1,0 +1,56 @@
+# Azure Storage Classes
+# Requires Azure Disk CSI Driver to be installed in the cluster
+
+---
+# Azure Premium SSD - Default for most workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-premium-ssd
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"  # Uncomment to make default
+provisioner: disk.csi.azure.com
+parameters:
+  skuName: Premium_LRS
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# Azure Standard SSD
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-standard-ssd
+provisioner: disk.csi.azure.com
+parameters:
+  skuName: StandardSSD_LRS
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# Azure Standard HDD
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-standard-hdd
+provisioner: disk.csi.azure.com
+parameters:
+  skuName: Standard_LRS
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# Azure Ultra Disk (High performance)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-ultra-disk
+provisioner: disk.csi.azure.com
+parameters:
+  skuName: UltraSSD_LRS
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true

@@ -1,0 +1,35 @@
+# Default StorageClass - Choose one based on your cloud provider
+# This is a template - select the appropriate storage class for your provider
+
+---
+# Generic default storage class (for local development/testing)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+
+---
+# Example: Local storage class for development (requires manual PV creation)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+
+---
+# Example: HostPath storage class for testing (NOT for production)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: hostpath
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+reclaimPolicy: Delete

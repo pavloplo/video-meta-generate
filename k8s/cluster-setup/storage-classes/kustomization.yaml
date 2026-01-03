@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: storage-classes
+
+resources:
+  - default-storage-class.yaml
+  - cloud-specific/
+    - aws-storage-classes.yaml
+    - gcp-storage-classes.yaml
+    - azure-storage-classes.yaml
+    - digitalocean-storage-classes.yaml
+
+# Optional: Add common labels
+commonLabels:
+  app.kubernetes.io/name: storage-classes
+  app.kubernetes.io/component: storage
