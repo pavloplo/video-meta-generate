@@ -16,7 +16,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sessions Session[]
+  sessions   Session[]
+  assets     Asset[]
+  thumbnails GeneratedThumbnail[]
 }
 
 model Session {
@@ -29,4 +31,46 @@ model Session {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model Asset {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  fileName  String
+  fileType  String
+  fileSize  Int
+  storageKey String  @unique  // S3/Supabase key
+  publicUrl  String?
+  
+  // Video-specific metadata
+  duration   Int?     // seconds
+  width      Int?
+  height     Int?
+  
+  createdAt DateTime @default(now())
+  
+  thumbnails GeneratedThumbnail[]
+  
+  @@index([userId])
+}
+
+model GeneratedThumbnail {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  assetId   String?  // Source asset if from upload
+  asset     Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  
+  imageUrl  String
+  storageKey String? @unique  // If stored in S3
+  hookText  String?
+  tone      String
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([assetId])
 }

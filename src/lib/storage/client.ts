@@ -1,24 +1,7 @@
 import "server-only";
 import { env } from "@/lib/env.server";
-
-/**
- * Storage client configuration.
- * Supports S3-compatible storage (AWS S3, Supabase Storage, etc.)
- *
- * Note: Install dependencies first:
- * npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
- */
-
-// Type definitions for when AWS SDK is installed
-type S3ClientConfig = {
-  region: string;
-  endpoint?: string;
-  credentials?: {
-    accessKeyId: string;
-    secretAccessKey: string;
-  };
-  forcePathStyle?: boolean;
-};
+import { S3Client, PutObjectCommand, GetObjectCommand, type S3ClientConfig } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 /**
  * Creates and returns an S3-compatible storage client.
@@ -34,34 +17,23 @@ export function getStorageClient() {
     return null;
   }
 
-  // Dynamic import to avoid errors if AWS SDK is not installed
-  try {
-    // Using require() for optional dependency that may not be installed
-    const { S3Client } = require("@aws-sdk/client-s3");
+  const config: S3ClientConfig = {
+    region: env.STORAGE_REGION,
+    credentials: {
+      accessKeyId: env.STORAGE_ACCESS_KEY_ID,
+      secretAccessKey: env.STORAGE_SECRET_ACCESS_KEY,
+    },
+  };
 
-    const config: S3ClientConfig = {
-      region: env.STORAGE_REGION,
-      credentials: {
-        accessKeyId: env.STORAGE_ACCESS_KEY_ID,
-        secretAccessKey: env.STORAGE_SECRET_ACCESS_KEY,
-      },
-    };
-
-    if (env.STORAGE_ENDPOINT) {
-      config.endpoint = env.STORAGE_ENDPOINT;
-    }
-
-    if (env.STORAGE_FORCE_PATH_STYLE) {
-      config.forcePathStyle = true;
-    }
-
-    return new S3Client(config);
-  } catch (error) {
-    console.warn(
-      "AWS SDK not installed. Install with: npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner"
-    );
-    return null;
+  if (env.STORAGE_ENDPOINT) {
+    config.endpoint = env.STORAGE_ENDPOINT;
   }
+
+  if (env.STORAGE_FORCE_PATH_STYLE) {
+    config.forcePathStyle = true;
+  }
+
+  return new S3Client(config);
 }
 
 export const STORAGE_BUCKET = env.STORAGE_BUCKET;
@@ -86,24 +58,16 @@ export async function uploadFile(
   const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
   const storageKey = `uploads/${userId}/${timestamp}-${sanitizedFileName}`;
 
-  try {
-    // Using require() for optional dependency
-    const { PutObjectCommand } = require("@aws-sdk/client-s3");
+  await client.send(
+    new PutObjectCommand({
+      Bucket: STORAGE_BUCKET,
+      Key: storageKey,
+      Body: buffer,
+      ContentType: mimeType,
+    })
+  );
 
-    await client.send(
-      new PutObjectCommand({
-        Bucket: STORAGE_BUCKET,
-        Key: storageKey,
-        Body: buffer,
-        ContentType: mimeType,
-      })
-    );
-
-    return storageKey;
-  } catch (error) {
-    console.error("Failed to upload file to storage:", error);
-    throw new Error("Failed to upload file");
-  }
+  return storageKey;
 }
 
 /**
@@ -123,21 +87,12 @@ export async function getFileUrl(storageKey: string): Promise<string> {
   }
 
   // For AWS S3, use presigned URL
-  try {
-    // Using require() for optional dependencies
-    const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-    const { GetObjectCommand } = require("@aws-sdk/client-s3");
+  const command = new GetObjectCommand({
+    Bucket: STORAGE_BUCKET,
+    Key: storageKey,
+  });
 
-    const command = new GetObjectCommand({
-      Bucket: STORAGE_BUCKET,
-      Key: storageKey,
-    });
-
-    const url = await getSignedUrl(client, command, { expiresIn: 3600 });
-    return url;
-  } catch (error) {
-    console.error("Failed to generate presigned URL:", error);
-    throw new Error("Failed to generate file URL");
-  }
+  const url = await getSignedUrl(client, command, { expiresIn: 3600 });
+  return url;
 }
 

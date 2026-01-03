@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth.server";
 import { validateFile } from "@/lib/fileValidation.server";
 import { uploadFile, getFileUrl } from "@/lib/storage/client";
+import { prisma } from "@/lib/db/prisma";
 import { UPLOAD_ERROR_MESSAGES } from "@/constants/video";
 
 /**
@@ -122,9 +123,31 @@ export async function POST(request: NextRequest) {
     // For videos, we need ffmpeg or similar
     // This is left as a TODO for now
 
-    // 8. Generate asset ID (UUID)
-    // TODO: Store in database when Asset model is added to Prisma schema
-    const assetId = crypto.randomUUID();
+    // 8. Save asset to database
+    const asset = await prisma.asset.create({
+      data: {
+        userId: user.id,
+        fileName,
+        fileType: mimeType,
+        fileSize,
+        storageKey,
+        publicUrl,
+        // Video metadata will be added when video processing is implemented
+        // duration: duration ? Math.round(duration) : null,
+        // width: metadata.width || null,
+        // height: metadata.height || null,
+      },
+      select: {
+        id: true,
+        fileName: true,
+        fileType: true,
+        fileSize: true,
+        duration: true,
+        width: true,
+        height: true,
+        publicUrl: true,
+      },
+    });
 
     // 9. Return response
     const response: {
@@ -139,21 +162,27 @@ export async function POST(request: NextRequest) {
         height?: number;
       };
     } = {
-      assetId,
-      fileName,
-      fileSize,
-      fileType: mimeType,
-      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+      assetId: asset.id,
+      fileName: asset.fileName,
+      fileSize: asset.fileSize,
+      fileType: asset.fileType,
     };
 
     // Add duration for videos (when video processing is available)
-    // if (isVideo && duration) {
-    //   response.duration = duration;
-    // }
+    if (asset.duration) {
+      response.duration = asset.duration;
+    }
+
+    // Add metadata if available
+    if (asset.width || asset.height) {
+      response.metadata = {};
+      if (asset.width) response.metadata.width = asset.width;
+      if (asset.height) response.metadata.height = asset.height;
+    }
 
     // Add thumbnail URL if available
-    if (publicUrl) {
-      response.thumbnailUrl = publicUrl;
+    if (asset.publicUrl) {
+      response.thumbnailUrl = asset.publicUrl;
     }
 
     return NextResponse.json(response, { status: 200 });

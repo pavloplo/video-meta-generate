@@ -30,21 +30,36 @@ Open [http://localhost:3000](http://localhost:3000) to view the UI.
 - `npm run start` – Run the production server after building.
 - `npm run lint` – Run Next.js lint checks.
 
-## Local DB (Docker)
+## Local Services (Docker)
 
-Start DB (local development only):
+Start PostgreSQL (local development only):
 
 ```bash
 docker compose --profile local up -d postgres
 ```
 
-Stop DB:
+Start MinIO (S3-compatible storage for local development):
+
+```bash
+docker compose --profile local up -d minio
+```
+
+Access MinIO Console: http://localhost:9001 (login: `minioadmin` / `minioadmin`)
+- Create a bucket named `uploads` in the console
+
+Start all local services:
+
+```bash
+docker compose --profile local up -d
+```
+
+Stop services:
 
 ```bash
 docker compose --profile local down
 ```
 
-Stop + wipe DB (destructive):
+Stop + wipe all data (destructive):
 
 ```bash
 docker compose --profile local down -v
@@ -57,11 +72,42 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/app?schema=public"
 DIRECT_URL="postgresql://postgres:postgres@localhost:5432/app?schema=public"
 ```
 
+**Or copy from example:**
+
+```bash
+cp env.example .env.local
+# Then edit .env.local with your values
+```
+
 Prisma / Next integration notes
 
 With Option A env validation, both URLs must be set in `.env.local`.
 
 Prisma will use `DIRECT_URL` for migrations once schema is added (Task 1.3).
+
+## File Storage Configuration
+
+For file uploads to work (POST /api/upload), you need to configure storage. See `env.example` for detailed instructions.
+
+**Quick setup options:**
+
+1. **Local MinIO (Docker)** - Easiest for local development
+   ```bash
+   docker compose --profile local up -d minio
+   ```
+   Then use the MinIO configuration from `.env.example` (Option 3)
+
+2. **Supabase Storage** - Good for development/staging
+   - Create a Supabase project
+   - Create a storage bucket
+   - Configure S3-compatible credentials
+
+3. **AWS S3** - Recommended for production
+   - Create an S3 bucket
+   - Create IAM user with S3 permissions
+   - Configure access keys
+
+See `.env.example` for complete configuration details.
 
 ## Project structure
 
