@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { VideoMetadataForm } from "@/components/templates/VideoMetadataForm";
+import { ResponsiveMetadataForm } from "@/components/templates/ResponsiveMetadataForm";
 
-export default async function CreateYoutubeMetainformationPage() {
+export default async function CreateYoutubeMetadataPage() {
   // Check for session cookie (middleware also checks, but this is a backup)
   // Full database session validation is handled separately
   // const cookieStore = await cookies();
@@ -19,12 +19,16 @@ export default async function CreateYoutubeMetainformationPage() {
   // if (!user) { redirect("/"); }
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-16 pt-8 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-semibold text-slate-950 sm:text-5xl">
-        Create metainformation for your youtube video
+    <main 
+      id="main-content" 
+      className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-12 pt-6 sm:px-6 lg:px-8"
+      aria-label="YouTube metadata generation"
+    >
+      <h1 className="text-2xl font-semibold text-slate-950 sm:text-3xl">
+        Create YouTube thumbnails and metadata
       </h1>
 
-      <VideoMetadataForm />
+      <ResponsiveMetadataForm />
     </main>
   );
 }
