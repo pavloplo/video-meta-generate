@@ -94,7 +94,7 @@ jobs:
             --from-literal=SESSION_TTL_DAYS=${{ secrets.SESSION_TTL_DAYS }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
-          # Create MinIO secrets (staging only)
+          # Create MinIO secrets
           kubectl create secret generic minio-secrets \
             -n staging \
             --from-literal=MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }} \

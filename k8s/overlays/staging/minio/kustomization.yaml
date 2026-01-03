@@ -8,6 +8,7 @@ resources:
 # Staging-specific patches
 patches:
   - path: patches/minio-resources.yaml
+  - path: patches/minio-pvc.yaml
 
 # Environment-specific labels
 labels:
