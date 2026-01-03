@@ -82,7 +82,7 @@ jobs:
             --from-literal=STORAGE_SECRET_ACCESS_KEY=${{ secrets.STORAGE_SECRET_ACCESS_KEY }} \
             --from-literal=STORAGE_REGION=${{ secrets.STORAGE_REGION }} \
             --from-literal=OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-            --dry-run=client -o yaml | kubectl apply -f -
+            --dry-run=client -o yaml | kubectl apply --validate=false -f -
 
           # Apply manifests (production uses managed database and cloud storage)
           kustomize build . | kubectl apply --validate=false -f -
