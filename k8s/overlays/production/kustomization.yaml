@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Base configurations
+bases:
+  - ../../base
+
+# Override namespace for production
+namespace: production
+
+# Patches for production environment
+patchesStrategicMerge:
+  - patches/hpa-scaling.yaml
+  - patches/app-resources.yaml
+
+# Environment-specific labels
+commonLabels:
+  environment: production
+  app.kubernetes.io/environment: production
+
+# Images with production-specific tags
+images:
+  - name: ghcr.io/video-meta-generate
+    newTag: prod-latest
+
+# Resources that are production-specific
+resources:
+  - namespace.yaml
+  - patches/ingress.yaml
