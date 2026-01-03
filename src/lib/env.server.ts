@@ -26,6 +26,13 @@ const EnvSchema = z.object({
     .transform((val) => val === "true")
     .default("false"),
 
+  // AI Provider Configuration
+  AI_PROVIDER: z.enum(["openai", "anthropic"]).default("openai"),
+  AI_TEXT_MODEL: z.string().min(1).default("gpt-4o"),
+  AI_IMAGE_MODEL: z.string().min(1).default("dall-e-3"),
+  OPENAI_API_KEY: z.string().min(1).optional(),
+  OPENAI_BASE_URL: z.string().url().optional(),
+
   NODE_ENV: z.enum(["development", "test", "production"]).optional(),
 });
 
