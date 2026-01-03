@@ -1,12 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Base configurations
+# Base configurations and staging-specific resources
 resources:
-  - ../../base
   - namespace.yaml
+  - ../../base
   - postgres
   - minio
+  - patches/ingress.yaml
 
 # Override namespace for staging
 namespace: staging
@@ -32,7 +33,3 @@ labels:
 # images:
 #   - name: ghcr.io/video-meta-generate
 #     newTag: staging-latest
-
-# Resources that are staging-specific
-resources:
-  - patches/ingress.yaml
