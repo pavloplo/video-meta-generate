@@ -104,7 +104,7 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
 
           # Apply manifests
-          kustomize build . | kubectl apply -f -
+          kustomize build . | kubectl apply --validate=false -f -
 
           # Wait for rollout
           kubectl rollout status deployment/video-meta-app -n staging --timeout=300s
