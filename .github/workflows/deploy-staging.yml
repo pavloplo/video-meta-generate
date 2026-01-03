@@ -20,7 +20,7 @@ jobs:
   build-and-push:
     runs-on: self-hosted
     outputs:
-      image: ${{ steps.build.outputs.image }}
+      image_tag: ${{ steps.meta.outputs.tags }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,7 +46,6 @@ jobs:
             type=sha,prefix=staging-
 
       - name: Build and push
-        id: build
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -73,11 +72,15 @@ jobs:
           echo "✅ Kubernetes cluster is accessible"
 
       - name: Deploy with Kustomize
+        env:
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
           cd k8s/overlays/staging
 
-          # Generate manifests and replace image
-          kubectl kustomize . | sed "s|ghcr.io/${{ github.repository }}:latest|${{ needs.build-and-push.outputs.image }}|g" > /tmp/manifests.yaml
+          echo "Deploying image: $IMAGE_TAG"
+
+          # Generate manifests and replace image placeholder
+          kubectl kustomize . | sed "s|ghcr.io/video-meta-generate:latest|$IMAGE_TAG|g" > /tmp/manifests.yaml
 
           # Create namespace first (if not exists)
           kubectl create namespace staging --dry-run=client -o yaml | kubectl apply -f -
