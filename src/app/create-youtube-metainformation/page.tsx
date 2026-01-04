@@ -1,21 +1,8 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
 import HeaderSticky from "@/components/organisms/HeaderSticky";
 import SiteFooter from "@/components/organisms/SiteFooter";
 import { ResponsiveMetadataForm } from "@/components/templates/ResponsiveMetadataForm";
 
 export default async function CreateYoutubeMetadataPage() {
-  // Check for session cookie (middleware also checks, but this is a backup)
-  // Full database session validation is handled separately
-  // const cookieStore = await cookies();
-  // const cookieName = process.env.SESSION_COOKIE_NAME ?? "sid";
-  // const sessionId = cookieStore.get(cookieName)?.value;
-
-  // if (!sessionId) {
-  //   redirect("/");
-  // }
-
   // TODO: Add full session validation with database when Prisma is configured
   // const user = await getCurrentUser();
   // if (!user) { redirect("/"); }
