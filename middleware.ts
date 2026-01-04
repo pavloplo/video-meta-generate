@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { AUTH_QUERY_KEYS } from "@/constants/auth";
 import { ROUTES } from "@/constants/navigation";
 
 /**
@@ -27,12 +26,10 @@ export async function middleware(request: NextRequest) {
   const sessionId = request.cookies.get(cookieName)?.value;
 
   if (!sessionId) {
+    // Redirect to auth page without any query parameters
+    // Return URL will be handled client-side via sessionStorage
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.AUTH;
-    url.searchParams.set(
-      AUTH_QUERY_KEYS.RETURN_TO,
-      `${request.nextUrl.pathname}${request.nextUrl.search}`
-    );
     return NextResponse.redirect(url);
   }
 

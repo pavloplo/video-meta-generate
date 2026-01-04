@@ -59,7 +59,6 @@ export const AUTH_INPUT_IDS = {
 export const AUTH_QUERY_KEYS = {
   MODE: "mode",
   TYPE: "type",
-  RETURN_TO: "returnTo",
 } as const;
 
 export const AUTH_STORAGE_KEYS = {

@@ -21,10 +21,9 @@ import {
 
 export interface AuthTemplateProps {
   initialMode: AuthMode;
-  returnTo?: string;
 }
 
-export const AuthTemplate = ({ initialMode, returnTo }: AuthTemplateProps) => {
+export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -34,25 +33,6 @@ export const AuthTemplate = ({ initialMode, returnTo }: AuthTemplateProps) => {
     confirmPassword: "",
   });
   const emailRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!returnTo) {
-      return;
-    }
-
-    const validatedReturnUrl = validateReturnUrl(returnTo, {
-      allowlist: RETURN_URL_ALLOWLIST,
-    });
-
-    if (validatedReturnUrl) {
-      sessionStorage.setItem(
-        AUTH_STORAGE_KEYS.RETURN_URL,
-        validatedReturnUrl
-      );
-    } else {
-      sessionStorage.removeItem(AUTH_STORAGE_KEYS.RETURN_URL);
-    }
-  }, [returnTo]);
 
   const consumeReturnUrl = () => {
     const storedValue = sessionStorage.getItem(AUTH_STORAGE_KEYS.RETURN_URL);

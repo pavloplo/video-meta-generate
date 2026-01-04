@@ -31,27 +31,11 @@ const getModeFromSearchParams = (
   return typeof rawValue === "string" ? rawValue : undefined;
 };
 
-const getReturnToFromSearchParams = (
-  searchParams: Record<string, string | string[] | undefined> | undefined
-) => {
-  if (!searchParams) {
-    return undefined;
-  }
-
-  const rawValue = searchParams[AUTH_QUERY_KEYS.RETURN_TO];
-  return typeof rawValue === "string" ? rawValue : undefined;
-};
-
 export default async function AuthPage({ searchParams }: AuthPageProps) {
   const resolvedSearchParams = await searchParams;
   const initialMode = resolveAuthMode(
     getModeFromSearchParams(resolvedSearchParams)
   );
 
-  return (
-    <AuthTemplate
-      initialMode={initialMode}
-      returnTo={getReturnToFromSearchParams(resolvedSearchParams)}
-    />
-  );
+  return <AuthTemplate initialMode={initialMode} />;
 }
