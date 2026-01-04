@@ -7,8 +7,8 @@ import {
 
 interface AuthPageProps {
   searchParams?:
-    | Record<string, string | string[] | undefined>
-    | Promise<Record<string, string | string[] | undefined>>;
+  | Record<string, string | string[] | undefined>
+  | Promise<Record<string, string | string[] | undefined>>;
 }
 
 const resolveAuthMode = (mode: string | undefined): AuthMode => {
@@ -26,7 +26,8 @@ const getModeFromSearchParams = (
     return undefined;
   }
 
-  const rawValue = searchParams[AUTH_QUERY_KEYS.MODE];
+  // Check for "type" parameter first (new format), then fall back to "mode" (legacy)
+  const rawValue = searchParams[AUTH_QUERY_KEYS.TYPE] || searchParams[AUTH_QUERY_KEYS.MODE];
   return typeof rawValue === "string" ? rawValue : undefined;
 };
 

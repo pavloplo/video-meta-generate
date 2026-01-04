@@ -18,7 +18,10 @@ Video packaging is often slow, inconsistent, and hard to standardize. Teams need
 - Generate a baseline set of tags to accelerate publishing prep
 
 ## Current user workflow (happy path)
-1. **Upload an input asset**
+1. **Authenticate** (if required)
+   - Sign up or log in via the authentication screen
+   - Direct links are supported: use `?type=signup` to link directly to signup form
+2. **Upload an input asset**
    - Upload a **video file** to drive thumbnail generation, or upload an **image** as a starting point.
 2. **Provide optional context**
    - Add **hook text** (a short “what’s the video about / what’s the hook?” line).
@@ -54,10 +57,9 @@ Video packaging is often slow, inconsistent, and hard to standardize. Teams need
 
 ## What is explicitly not part of the product (yet)
 These items may appear in marketing copy or UI affordances, but are **not implemented end-to-end** in the current product:
-- **Account management and sign-in** (the app has an auth screen, but does not provide a complete login flow)
 - **Team workflows** like approvals, comments, and audit history
 - **Publishing/export integrations** (e.g., pushing metadata directly to YouTube or other platforms)
-- **Persistent project/video library** (saving and browsing previously generated work as a “dashboard”)
+- **Persistent project/video library** (saving and browsing previously generated work as a "dashboard")
 - **Multi-language localization workflows**
 - **Deep video analysis** features (e.g., transcript extraction, chapter generation)
 - **Fully functional editing + copy tools** for generated text (UI controls may exist, but editing/copy behavior is not guaranteed)

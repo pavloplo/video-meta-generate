@@ -8,6 +8,7 @@ export interface FormFieldProps
   label: string;
   containerClassName?: string;
   inputClassName?: string;
+  error?: string;
 }
 
 export const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
@@ -17,6 +18,7 @@ export const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
     containerClassName,
     inputClassName,
     className,
+    error,
     ...props
   }, ref) => {
     return (
@@ -27,9 +29,22 @@ export const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
         <Input
           ref={ref}
           id={id}
-          className={cn(inputClassName, className)}
+          className={cn(
+            inputClassName,
+            error && "border-red-300 focus-visible:ring-red-500/40",
+            className
+          )}
           {...props}
         />
+        <p
+          className={cn(
+            "text-xs leading-tight transition-opacity duration-200 min-h-[1.125rem]",
+            error ? "text-red-600 opacity-100" : "opacity-0"
+          )}
+          role={error ? "alert" : undefined}
+        >
+          {error || "\u00A0"}
+        </p>
       </div>
     );
   }

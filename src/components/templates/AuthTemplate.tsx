@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
 import { Typography } from "@/components/atoms/Typography";
@@ -11,6 +11,7 @@ import {
   AUTH_STRINGS,
   type AuthMode,
 } from "@/constants/auth";
+import { useState } from "react";
 
 export interface AuthTemplateProps {
   initialMode: AuthMode;
@@ -18,6 +19,7 @@ export interface AuthTemplateProps {
 
 export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
   const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [values, setValues] = useState<AuthFormValues>({
     email: "",
     password: "",
@@ -30,16 +32,25 @@ export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
       return;
     }
 
-    setMode(nextMode);
-    setValues((current) => ({
-      ...current,
-      password: "",
-      confirmPassword: "",
-    }));
+    setIsTransitioning(true);
 
-    window.requestAnimationFrame(() => {
-      emailRef.current?.focus();
-    });
+    // Start transition
+    setTimeout(() => {
+      setMode(nextMode);
+      setValues((current) => ({
+        ...current,
+        password: "",
+        confirmPassword: "",
+      }));
+
+      // End transition after content has changed
+      setTimeout(() => {
+        setIsTransitioning(false);
+        window.requestAnimationFrame(() => {
+          emailRef.current?.focus();
+        });
+      }, 150);
+    }, 150);
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -53,16 +64,26 @@ export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
           <p className="text-xs uppercase tracking-[0.3em] text-indigo-500">
             {AUTH_STRINGS.toggle.label}
           </p>
-          <CardTitle className="text-2xl font-semibold text-slate-950">
+          <CardTitle
+            className={`text-2xl font-semibold text-slate-950 transition-all duration-300 ease-in-out ${isTransitioning ? 'opacity-0 transform translate-y-1' : 'opacity-100 transform translate-y-0'
+              }`}
+          >
             {AUTH_STRINGS.title[mode]}
           </CardTitle>
-          <Typography className="text-sm text-slate-600">
+          <Typography
+            className={`text-sm text-slate-600 transition-all duration-300 ease-in-out delay-75 ${isTransitioning ? 'opacity-0 transform translate-y-1' : 'opacity-100 transform translate-y-0'
+              }`}
+          >
             {AUTH_STRINGS.subtitle[mode]}
           </Typography>
         </CardHeader>
-        <CardContent className="space-y-6 p-0">
+        <CardContent
+          className={`space-y-6 p-0 transition-all duration-300 ease-in-out delay-100 ${isTransitioning ? 'opacity-0 transform translate-y-2' : 'opacity-100 transform translate-y-0'
+            }`}
+        >
           <AuthModeToggle mode={mode} onModeChange={handleModeChange} />
           <AuthForm
+            key={mode}
             mode={mode}
             values={values}
             emailRef={emailRef}
