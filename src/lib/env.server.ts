@@ -23,8 +23,8 @@ const EnvSchema = z.object({
   STORAGE_SECRET_ACCESS_KEY: z.string().min(1).optional(),
   STORAGE_FORCE_PATH_STYLE: z
     .string()
-    .transform((val) => val === "true")
-    .default("false"),
+    .default("false")
+    .transform((val) => val === "true"),
 
   // AI Provider Configuration
   AI_PROVIDER: z.enum(["openai", "anthropic"]).default("openai"),

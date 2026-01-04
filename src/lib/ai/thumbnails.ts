@@ -93,7 +93,7 @@ export async function generateThumbnailImages(
       style: tone === "viral" ? "vivid" : "natural",
     });
 
-    const imageUrl = response.data[0]?.url;
+    const imageUrl = response.data?.[0]?.url;
     if (!imageUrl) {
       throw new Error(`Failed to generate thumbnail ${index + 1}`);
     }
