@@ -8,6 +8,7 @@ export const NAVIGATION_LINKS = [
 
 export const ROUTES = {
   HOME: '/',
+  AUTH: '/auth',
   DASHBOARD: '/dashboard',
   VIDEO_GENERATE: '/create-youtube-metainformation',
 } as const;

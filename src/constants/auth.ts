@@ -61,6 +61,10 @@ export const AUTH_QUERY_KEYS = {
   TYPE: "type",
 } as const;
 
+export const AUTH_STORAGE_KEYS = {
+  RETURN_URL: "auth-return-url",
+} as const;
+
 export const AUTH_VALIDATION = {
   email: {
     required: "Email address is required",

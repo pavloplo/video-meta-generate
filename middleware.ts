@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { ROUTES } from "@/constants/navigation";
+
 /**
  * Protected routes that require authentication.
  */
-const protectedRoutes = ["/create-youtube-metainformation"];
+const protectedRoutes = [ROUTES.VIDEO_GENERATE];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -24,12 +26,10 @@ export async function middleware(request: NextRequest) {
   const sessionId = request.cookies.get(cookieName)?.value;
 
   if (!sessionId) {
+    // Redirect to auth page without any query parameters
+    // Return URL will be handled client-side via sessionStorage
     const url = request.nextUrl.clone();
-    url.pathname = "/auth";
-    url.searchParams.set(
-      "returnTo",
-      `${request.nextUrl.pathname}${request.nextUrl.search}`
-    );
+    url.pathname = ROUTES.AUTH;
     return NextResponse.redirect(url);
   }
 

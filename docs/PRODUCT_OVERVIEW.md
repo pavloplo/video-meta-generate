@@ -21,6 +21,7 @@ Video packaging is often slow, inconsistent, and hard to standardize. Teams need
 1. **Authenticate** (if required)
    - Sign up or log in via the authentication screen
    - Direct links are supported: use `?type=signup` to link directly to signup form
+   - After authentication, the product sends users back to their intended destination
 2. **Upload an input asset**
    - Upload a **video file** to drive thumbnail generation, or upload an **image** as a starting point.
 2. **Provide optional context**
@@ -69,4 +70,3 @@ These items may appear in marketing copy or UI affordances, but are **not implem
 - **Tone**: a style preset that influences how “viral”, “curiosity-driven”, or “educational” the outputs feel.
 - **Variant**: one of several alternative thumbnail options generated for the same inputs.
 - **Tags**: suggested keywords/hashtags intended to improve discoverability and categorization.
-
