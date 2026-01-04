@@ -54,7 +54,7 @@ Video packaging is often slow, inconsistent, and hard to standardize. Teams need
 
 ## What is explicitly not part of the product (yet)
 These items may appear in marketing copy or UI affordances, but are **not implemented end-to-end** in the current product:
-- **Account management and sign-in** (the app does not provide a complete user login flow)
+- **Account management and sign-in** (the app has an auth screen, but does not provide a complete login flow)
 - **Team workflows** like approvals, comments, and audit history
 - **Publishing/export integrations** (e.g., pushing metadata directly to YouTube or other platforms)
 - **Persistent project/video library** (saving and browsing previously generated work as a “dashboard”)
@@ -67,5 +67,4 @@ These items may appear in marketing copy or UI affordances, but are **not implem
 - **Tone**: a style preset that influences how “viral”, “curiosity-driven”, or “educational” the outputs feel.
 - **Variant**: one of several alternative thumbnail options generated for the same inputs.
 - **Tags**: suggested keywords/hashtags intended to improve discoverability and categorization.
-
 
