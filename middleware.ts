@@ -23,12 +23,15 @@ export async function middleware(request: NextRequest) {
   const cookieName = process.env.SESSION_COOKIE_NAME ?? "sid";
   const sessionId = request.cookies.get(cookieName)?.value;
 
-  // if (!sessionId) {
-  //   // Redirect to home page (or login page if it exists)
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = "/";
-  //   return NextResponse.redirect(url);
-  // }
+  if (!sessionId) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth";
+    url.searchParams.set(
+      "returnTo",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    );
+    return NextResponse.redirect(url);
+  }
 
   // Session validation happens in the page component
   // Middleware just checks for cookie presence

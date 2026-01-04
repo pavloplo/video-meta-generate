@@ -58,4 +58,21 @@ export const AUTH_INPUT_IDS = {
 
 export const AUTH_QUERY_KEYS = {
   MODE: "mode",
+  TYPE: "type",
+} as const;
+
+export const AUTH_VALIDATION = {
+  email: {
+    required: "Email address is required",
+    invalid: "Please enter a valid email address",
+  },
+  password: {
+    required: "Password is required",
+    minLength: "Password must be at least 8 characters long",
+    maxLength: "Password must be less than 128 characters",
+  },
+  confirmPassword: {
+    required: "Please confirm your password",
+    mismatch: "Passwords do not match",
+  },
 } as const;
