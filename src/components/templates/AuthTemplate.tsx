@@ -47,15 +47,20 @@ export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2">
-          <CardTitle>{AUTH_STRINGS.title[mode]}</CardTitle>
-          <Typography className="text-sm text-muted-foreground">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50/80 px-4 py-12 text-slate-900">
+      <Card className="w-full max-w-md rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.45)] backdrop-blur">
+        <CardHeader className="space-y-3 p-0 pb-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-indigo-500">
+            {AUTH_STRINGS.toggle.label}
+          </p>
+          <CardTitle className="text-2xl font-semibold text-slate-950">
+            {AUTH_STRINGS.title[mode]}
+          </CardTitle>
+          <Typography className="text-sm text-slate-600">
             {AUTH_STRINGS.subtitle[mode]}
           </Typography>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-0">
           <AuthModeToggle mode={mode} onModeChange={handleModeChange} />
           <AuthForm
             mode={mode}
@@ -72,10 +77,10 @@ export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
             }
             onSubmit={handleSubmit}
           />
-          <div className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-sm text-slate-500">
             {AUTH_STRINGS.toggle.helper[mode]}{" "}
             <button
-              className="font-medium text-primary hover:underline"
+              className="font-semibold text-indigo-600 hover:text-indigo-500 hover:underline"
               type="button"
               onClick={() =>
                 handleModeChange(

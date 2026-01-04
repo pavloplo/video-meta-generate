@@ -20,7 +20,7 @@ export const AuthModeToggle = ({
   return (
     <div
       className={cn(
-        "flex w-full items-center gap-2 rounded-md bg-muted p-1",
+        "flex w-full items-center gap-2 rounded-full border border-slate-200 bg-white/80 p-1 shadow-sm",
         className
       )}
       role="group"
@@ -32,8 +32,14 @@ export const AuthModeToggle = ({
           <Button
             key={option.value}
             type="button"
-            variant={isActive ? "secondary" : "ghost"}
-            className={cn("flex-1", !isActive && "text-muted-foreground")}
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "flex-1 rounded-full px-4 text-xs font-semibold uppercase tracking-[0.15em]",
+              isActive
+                ? "bg-slate-900 text-white shadow-sm hover:bg-slate-900"
+                : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+            )}
             aria-pressed={isActive}
             onClick={() => onModeChange(option.value)}
           >

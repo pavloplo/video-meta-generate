@@ -32,6 +32,9 @@ export const AuthForm = ({
   onConfirmPasswordChange,
   onSubmit,
 }: AuthFormProps) => {
+  const inputStyles =
+    "border-slate-200 bg-white/90 text-slate-900 placeholder:text-slate-400 focus-visible:ring-indigo-500/40";
+
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
       <FormField
@@ -43,6 +46,7 @@ export const AuthForm = ({
         required
         placeholder={AUTH_STRINGS.fields.email.placeholder}
         value={values.email}
+        inputClassName={inputStyles}
         onChange={(event) => onEmailChange(event.target.value)}
       />
       <FormField
@@ -55,6 +59,7 @@ export const AuthForm = ({
         required
         placeholder={AUTH_STRINGS.fields.password.placeholder}
         value={values.password}
+        inputClassName={inputStyles}
         onChange={(event) => onPasswordChange(event.target.value)}
       />
       {mode === AUTH_MODES.SIGNUP && (
@@ -66,10 +71,15 @@ export const AuthForm = ({
           required
           placeholder={AUTH_STRINGS.fields.confirmPassword.placeholder}
           value={values.confirmPassword}
+          inputClassName={inputStyles}
           onChange={(event) => onConfirmPasswordChange(event.target.value)}
         />
       )}
-      <Button className="w-full" type="submit">
+      <Button
+        className="w-full rounded-full bg-gradient-to-r from-indigo-600 to-sky-500 text-white shadow-[0_15px_35px_-20px_rgba(79,70,229,0.8)] transition hover:from-indigo-500 hover:to-sky-400"
+        type="submit"
+        variant="ghost"
+      >
         {AUTH_STRINGS.actions[mode]}
       </Button>
     </form>

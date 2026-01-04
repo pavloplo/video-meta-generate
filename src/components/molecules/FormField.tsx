@@ -21,10 +21,7 @@ export const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
   }, ref) => {
     return (
       <div className={cn("space-y-2", containerClassName)}>
-        <label
-          className="text-sm font-medium text-foreground"
-          htmlFor={id}
-        >
+        <label className="text-sm font-medium text-slate-700" htmlFor={id}>
           {label}
         </label>
         <Input
