@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
 import { Typography } from "@/components/atoms/Typography";
@@ -8,16 +9,23 @@ import { AuthModeToggle } from "@/components/molecules/AuthModeToggle";
 import { AuthForm, type AuthFormValues } from "@/components/organisms/AuthForm";
 import {
   AUTH_MODES,
+  AUTH_STORAGE_KEYS,
   AUTH_STRINGS,
   type AuthMode,
 } from "@/constants/auth";
-import { useState } from "react";
+import { ROUTES } from "@/constants/navigation";
+import {
+  RETURN_URL_ALLOWLIST,
+  validateReturnUrl,
+} from "@/lib/auth/return-url";
 
 export interface AuthTemplateProps {
   initialMode: AuthMode;
+  returnTo?: string;
 }
 
-export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
+export const AuthTemplate = ({ initialMode, returnTo }: AuthTemplateProps) => {
+  const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [values, setValues] = useState<AuthFormValues>({
@@ -26,6 +34,36 @@ export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
     confirmPassword: "",
   });
   const emailRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!returnTo) {
+      return;
+    }
+
+    const validatedReturnUrl = validateReturnUrl(returnTo, {
+      allowlist: RETURN_URL_ALLOWLIST,
+    });
+
+    if (validatedReturnUrl) {
+      sessionStorage.setItem(
+        AUTH_STORAGE_KEYS.RETURN_URL,
+        validatedReturnUrl
+      );
+    } else {
+      sessionStorage.removeItem(AUTH_STORAGE_KEYS.RETURN_URL);
+    }
+  }, [returnTo]);
+
+  const consumeReturnUrl = () => {
+    const storedValue = sessionStorage.getItem(AUTH_STORAGE_KEYS.RETURN_URL);
+    const validatedReturnUrl = validateReturnUrl(storedValue, {
+      allowlist: RETURN_URL_ALLOWLIST,
+    });
+
+    sessionStorage.removeItem(AUTH_STORAGE_KEYS.RETURN_URL);
+
+    return validatedReturnUrl ?? ROUTES.HOME;
+  };
 
   const handleModeChange = (nextMode: AuthMode) => {
     if (nextMode === mode) {
@@ -55,6 +93,8 @@ export const AuthTemplate = ({ initialMode }: AuthTemplateProps) => {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const destination = consumeReturnUrl();
+    router.replace(destination);
   };
 
   return (
